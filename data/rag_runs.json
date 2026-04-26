@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q001",
+    "query": "How should a production RAG system detect unsupported claims?",
+    "pipeline": "Hybrid + reranker",
+    "answer": "A production RAG system should compare generated claims against retrieved evidence, verify citation coverage, flag statements without supporting passages, and track hallucination risk as a regression metric across prompt and retriever versions.",
+    "expected_topics": ["claim verification", "citation coverage", "hallucination risk", "regression testing"],
+    "retrieved_sources": [
+      {"title": "RAG evaluation playbook", "score": 0.94, "snippet": "Unsupported claims should be flagged when generated assertions cannot be mapped to retrieved evidence chunks."},
+      {"title": "LLMOps monitoring guide", "score": 0.88, "snippet": "Grounding, citation coverage, and hallucination risk should be monitored across releases."}
+    ],
+    "metrics": {"recall_at_5": 1.0, "precision_at_5": 0.8, "groundedness": 0.92, "citation_coverage": 0.9, "hallucination_risk": 0.08, "latency_ms": 830, "cost_usd": 0.0018},
+    "failure_tags": []
+  },
+  {
+    "id": "q002",
+    "query": "Why can keyword-only retrieval fail in technical support assistants?",
+    "pipeline": "BM25 baseline",
+    "answer": "Keyword-only retrieval may miss semantically relevant documents when users describe the same issue with different vocabulary, abbreviations, or incomplete symptoms.",
+    "expected_topics": ["semantic mismatch", "synonyms", "abbreviations", "recall"],
+    "retrieved_sources": [
+      {"title": "Search failure cases", "score": 0.77, "snippet": "Lexical search is sensitive to exact terminology and can miss semantically related passages."},
+      {"title": "Support assistant logs", "score": 0.52, "snippet": "Users often provide partial symptoms rather than exact product terms."}
+    ],
+    "metrics": {"recall_at_5": 0.62, "precision_at_5": 0.4, "groundedness": 0.74, "citation_coverage": 0.67, "hallucination_risk": 0.26, "latency_ms": 295, "cost_usd": 0.0006},
+    "failure_tags": ["partial_context", "missed_context"]
+  },
+  {
+    "id": "q003",
+    "query": "What does reranking add after hybrid retrieval?",
+    "pipeline": "Hybrid + reranker",
+    "answer": "Reranking improves the ordering of candidate passages after broad retrieval. Hybrid search increases candidate recall, while reranking promotes the most answer-relevant evidence to the top context window.",
+    "expected_topics": ["candidate recall", "ranking quality", "context window", "answer relevance"],
+    "retrieved_sources": [
+      {"title": "Hybrid retrieval architecture", "score": 0.91, "snippet": "Hybrid retrieval is commonly used to maximize candidate coverage before a more precise ranking stage."},
+      {"title": "Reranking guide", "score": 0.9, "snippet": "Rerankers optimize passage order for relevance to the user question."}
+    ],
+    "metrics": {"recall_at_5": 0.95, "precision_at_5": 0.72, "groundedness": 0.9, "citation_coverage": 0.88, "hallucination_risk": 0.1, "latency_ms": 870, "cost_usd": 0.0019},
+    "failure_tags": []
+  },
+  {
+    "id": "q004",
+    "query": "How can RAG dashboards expose cost and latency trade-offs?",
+    "pipeline": "Dense embeddings",
+    "answer": "A RAG dashboard can expose latency and cost by recording retrieval time, reranking time, prompt token volume, completion tokens, total request duration, and estimated cost per query or per thousand queries.",
+    "expected_topics": ["retrieval time", "token cost", "latency", "cost per query"],
+    "retrieved_sources": [
+      {"title": "Operational metrics for RAG", "score": 0.86, "snippet": "Token usage and request duration should be tracked by pipeline version."},
+      {"title": "LLM cost monitoring", "score": 0.83, "snippet": "Cost per query can be estimated from prompt tokens, completion tokens, and model pricing."}
+    ],
+    "metrics": {"recall_at_5": 0.82, "precision_at_5": 0.56, "groundedness": 0.84, "citation_coverage": 0.8, "hallucination_risk": 0.16, "latency_ms": 650, "cost_usd": 0.0012},
+    "failure_tags": ["citation_gap"]
+  },
+  {
+    "id": "q005",
+    "query": "What is the main benefit of evaluating RAG before deployment?",
+    "pipeline": "Hybrid retrieval",
+    "answer": "Pre-deployment RAG evaluation catches retrieval gaps, weak prompts, unsupported answers, and cost regressions before users rely on the system in production.",
+    "expected_topics": ["pre-deployment testing", "retrieval gaps", "unsupported answers", "cost regressions"],
+    "retrieved_sources": [
+      {"title": "RAG release checklist", "score": 0.89, "snippet": "Evaluation before release reduces production hallucination and retrieval regressions."},
+      {"title": "Prompt regression testing", "score": 0.78, "snippet": "Prompt and retriever changes should be tested against stable evaluation cases."}
+    ],
+    "metrics": {"recall_at_5": 0.88, "precision_at_5": 0.62, "groundedness": 0.86, "citation_coverage": 0.82, "hallucination_risk": 0.14, "latency_ms": 715, "cost_usd": 0.0015},
+    "failure_tags": []
+  }
+]
