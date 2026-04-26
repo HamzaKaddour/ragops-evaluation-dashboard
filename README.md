@@ -1,67 +1,77 @@
 # RAGOps Evaluation Dashboard
 
-A production-style static dashboard for evaluating Retrieval-Augmented Generation (RAG) systems. The project is designed for GitHub Pages: no paid backend, no always-on server, and no API keys required for the public demo.
+A RAG evaluation and observability dashboard for analyzing retrieval quality, answer grounding, hallucination risk, latency, and cost across multiple Retrieval-Augmented Generation pipeline variants.
 
-The dashboard demonstrates practical LLMOps skills that are valuable in AI engineering roles: retrieval evaluation, grounding analysis, hallucination risk scoring, chunking comparison, cost/latency awareness, and trace-level debugging.
+The project separates the evaluation layer from the user-facing interface. Python scripts generate structured evaluation artifacts, and the dashboard visualizes those artifacts through an interactive static application.
 
-## Live demo
-
-After GitHub Pages is enabled, the app will be available at:
+## Live application
 
 ```text
 https://hamzakaddour.github.io/ragops-evaluation-dashboard/
 ```
 
-## What this project demonstrates
+## Core capabilities
 
-- RAG pipeline design: query, retrieval, reranking, generation, and evaluation.
+- RAG pipeline comparison across keyword, dense, hybrid, and reranked retrieval variants.
 - Retrieval quality metrics: Recall@K, Precision@K, MRR, and nDCG.
-- Answer quality metrics: groundedness, citation coverage, unsupported claim risk, and faithfulness.
-- LLMOps thinking: trace inspection, prompt/version comparison, latency, and token-cost awareness.
-- Static deployment architecture suitable for GitHub Pages.
-- Reproducible offline artifact generation through Python scripts.
+- Answer reliability metrics: groundedness, citation coverage, hallucination risk, and faithfulness.
+- Query-level trace inspection with retrieved source snippets and evidence scores.
+- Operational metrics: latency, estimated token cost, and failure-mode distribution.
+- Reproducible artifact generation using lightweight Python scripts.
 
-## Architecture
+## System architecture
 
 ```text
-scripts/                 Offline artifact generation
+scripts/                 Evaluation artifact generation
   generate_demo_artifacts.py
 
-data/                    Precomputed RAG traces and metrics
+data/                    Structured RAG metrics and traces
   evaluation_summary.json
   rag_runs.json
 
-css/                     Styling
+css/                     Dashboard styling
   styles.css
 
-js/                      Frontend dashboard logic
+js/                      Interactive dashboard logic
   app.js
 
-index.html               GitHub Pages application
-.github/workflows/       Optional Pages deployment workflow
+index.html               Dashboard entry point
+.github/workflows/       Deployment workflow
 ```
 
-The public app is static. The heavier work is done offline or through GitHub Actions, then exported to JSON files consumed by the dashboard.
+The evaluation pipeline produces JSON artifacts that can be inspected directly or rendered through the dashboard. This mirrors a common production pattern where batch evaluation jobs generate reliability reports that are later consumed by monitoring or review interfaces.
 
-## Why this design is practical
+## Evaluation dimensions
 
-Many RAG demos stop at "chat with PDF." This project focuses on the part companies care about in production: whether the system retrieves the right context, cites its sources, avoids hallucination, stays within latency/cost targets, and exposes failure cases clearly.
+### Retrieval diagnostics
+
+The system compares retrieval strategies using ranking metrics. This helps identify whether poor answers are caused by missing evidence, weak ranking, or insufficient context coverage.
+
+### Grounding analysis
+
+Generated answers are assessed against retrieved passages to estimate whether the response is supported by evidence. The dashboard tracks citation coverage, hallucination risk, and faithfulness-style indicators.
+
+### Operational monitoring
+
+The dashboard includes latency and cost estimates to make pipeline comparison practical. A higher-quality RAG pipeline may not be suitable for deployment if it introduces unacceptable latency or cost.
+
+### Trace-level inspection
+
+Each evaluated query includes retrieved sources, answer text, metrics, and failure tags. This supports debugging beyond aggregate scores.
 
 ## Local preview
-
-Clone the repository and run a simple static server:
 
 ```bash
 python -m http.server 8000
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:8000
 ```
 
-## Regenerate demo artifacts
+## Regenerate artifacts
 
 ```bash
 python -m venv .venv
@@ -70,12 +80,8 @@ pip install -r requirements.txt
 python scripts/generate_demo_artifacts.py
 ```
 
-## Suggested GitHub repository topics
+## Repository topics
 
 ```text
 rag, llmops, retrieval-augmented-generation, semantic-search, ai-evaluation, embeddings, mlops, observability, github-pages, python
 ```
-
-## Recruiter-facing summary
-
-This project simulates the evaluation layer of a production RAG system. It is intentionally backend-free for the deployed demo, but the repository includes an artifact generation workflow that mirrors how AI teams separate offline evaluation pipelines from frontend monitoring dashboards.
