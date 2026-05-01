@@ -1,0 +1,44 @@
+[
+  {
+    "id": "q001",
+    "query": "How should a production RAG system detect unsupported claims?",
+    "expected_answer_topics": ["claim verification", "retrieved evidence", "groundedness", "citation coverage", "hallucination risk"],
+    "relevant_doc_ids": ["doc_rag_eval_001", "doc_rag_eval_003"],
+    "preferred_pipeline": "Hybrid + reranker"
+  },
+  {
+    "id": "q002",
+    "query": "Why can keyword-only retrieval fail in technical support assistants?",
+    "expected_answer_topics": ["lexical mismatch", "different vocabulary", "abbreviations", "semantic retrieval", "recall"],
+    "relevant_doc_ids": ["doc_support_001", "doc_rag_eval_002"],
+    "preferred_pipeline": "Dense embeddings"
+  },
+  {
+    "id": "q003",
+    "query": "What does reranking add after hybrid retrieval?",
+    "expected_answer_topics": ["candidate passages", "ranking quality", "answer relevance", "context window"],
+    "relevant_doc_ids": ["doc_rag_eval_002"],
+    "preferred_pipeline": "Hybrid + reranker"
+  },
+  {
+    "id": "q004",
+    "query": "How can RAG dashboards expose cost and latency trade-offs?",
+    "expected_answer_topics": ["latency", "token cost", "cost per query", "cost per thousand queries", "pipeline comparison"],
+    "relevant_doc_ids": ["doc_rag_eval_004", "doc_ops_001"],
+    "preferred_pipeline": "Hybrid retrieval"
+  },
+  {
+    "id": "q005",
+    "query": "What is the main benefit of evaluating RAG before deployment?",
+    "expected_answer_topics": ["regression testing", "retrieval quality", "answer quality", "latency", "cost", "failure categories"],
+    "relevant_doc_ids": ["doc_rag_eval_006", "doc_rag_eval_001", "doc_rag_eval_005"],
+    "preferred_pipeline": "Hybrid + reranker"
+  },
+  {
+    "id": "q006",
+    "query": "Why is trace-level inspection useful for debugging RAG failures?",
+    "expected_answer_topics": ["query", "retrieved chunks", "ranking scores", "answer", "failure tags"],
+    "relevant_doc_ids": ["doc_rag_eval_005"],
+    "preferred_pipeline": "Hybrid + reranker"
+  }
+]
