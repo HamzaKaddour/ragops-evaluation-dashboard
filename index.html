@@ -47,6 +47,42 @@
       </div>
     </section>
 
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Methodology</p>
+          <h2>How the evaluation artifacts are produced</h2>
+        </div>
+        <span class="chip">Corpus · Queries · Metrics</span>
+      </div>
+      <div class="notes-grid methodology-grid">
+        <article>
+          <h3>1. Labeled evaluation set</h3>
+          <p>The pipeline starts from a compact document corpus and labeled evaluation queries. Each query lists the source documents that should be retrieved and the answer topics expected in a supported response.</p>
+        </article>
+        <article>
+          <h3>2. Retrieval variants</h3>
+          <p>Four retrieval configurations are compared: keyword retrieval, dense-style semantic retrieval, hybrid score fusion, and hybrid retrieval with relevance-aware reranking.</p>
+        </article>
+        <article>
+          <h3>3. Ranking metrics</h3>
+          <p>The script computes Recall@5, Precision@5, MRR, and nDCG@5 from the retrieved documents and the labeled relevant document set.</p>
+        </article>
+        <article>
+          <h3>4. Reliability scores</h3>
+          <p>Groundedness, citation coverage, and hallucination risk are estimated from retrieval coverage and precision, then attached to each query-level trace.</p>
+        </article>
+        <article>
+          <h3>5. Operational trade-offs</h3>
+          <p>Each pipeline variant includes latency and cost estimates so quality can be compared against serving constraints.</p>
+        </article>
+        <article>
+          <h3>6. Trace inspection</h3>
+          <p>Each evaluated query stores retrieved source snippets, ranking scores, generated answer text, metrics, and failure tags for debugging.</p>
+        </article>
+      </div>
+    </section>
+
     <section class="grid-2">
       <div class="panel">
         <div class="panel-heading">
