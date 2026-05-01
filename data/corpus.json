@@ -1,0 +1,50 @@
+[
+  {
+    "id": "doc_rag_eval_001",
+    "title": "RAG Evaluation Playbook",
+    "category": "Evaluation",
+    "text": "A production RAG system should evaluate retrieval and answer generation separately. Retrieval evaluation measures whether relevant chunks are found and ranked highly. Answer evaluation measures whether generated claims are supported by the retrieved evidence. Useful checks include Recall@K, Precision@K, MRR, nDCG, groundedness, citation coverage, and hallucination risk. Unsupported claims should be flagged when generated assertions cannot be mapped to evidence passages."
+  },
+  {
+    "id": "doc_rag_eval_002",
+    "title": "Retrieval Strategy Comparison",
+    "category": "Retrieval",
+    "text": "BM25 keyword search is fast and inexpensive but depends on lexical overlap between the query and documents. Dense embedding retrieval can find semantically similar content even when the wording differs. Hybrid retrieval combines keyword and dense retrieval to improve candidate coverage. A reranker can reorder candidate passages so that the most answer-relevant evidence appears near the top of the context window."
+  },
+  {
+    "id": "doc_rag_eval_003",
+    "title": "Grounding and Citation Coverage",
+    "category": "Reliability",
+    "text": "Grounding describes whether an answer is supported by retrieved evidence. Citation coverage estimates whether important statements in the answer are backed by source passages. A response can sound plausible but still be risky if it includes claims that are not present in the retrieved context. Grounding analysis is useful for reducing hallucination risk in RAG systems."
+  },
+  {
+    "id": "doc_rag_eval_004",
+    "title": "Operational Metrics for RAG",
+    "category": "Operations",
+    "text": "RAG systems should track operational metrics such as retrieval latency, reranking latency, generation latency, prompt tokens, completion tokens, total request time, and estimated cost per query. Higher retrieval quality can increase latency and cost, especially when reranking or larger context windows are used. Production teams need to balance quality, latency, and cost."
+  },
+  {
+    "id": "doc_rag_eval_005",
+    "title": "Trace-Level Debugging",
+    "category": "Observability",
+    "text": "Aggregate metrics are not enough to debug RAG systems. Engineers need trace-level inspection that shows the user query, retrieved chunks, ranking scores, generated answer, evaluation scores, and failure tags. Trace inspection helps determine whether a failure came from missed context, partial context, weak ranking, unsupported claims, or citation gaps."
+  },
+  {
+    "id": "doc_rag_eval_006",
+    "title": "Prompt and Retriever Regression Testing",
+    "category": "LLMOps",
+    "text": "Prompt changes, embedding model changes, chunking changes, and retriever configuration changes can introduce regressions. A stable evaluation set should be used to compare pipeline versions. Regression tests should track answer quality, retrieval quality, latency, token usage, cost, and failure categories across releases."
+  },
+  {
+    "id": "doc_support_001",
+    "title": "Technical Support Search Failure Cases",
+    "category": "Search",
+    "text": "Keyword-only search may fail in support assistants when users describe issues with different vocabulary, abbreviations, or partial symptoms. Semantic retrieval can improve recall by matching meaning instead of exact wording. Hybrid retrieval is often used when both exact terms and semantic similarity matter."
+  },
+  {
+    "id": "doc_ops_001",
+    "title": "AI System Cost Monitoring",
+    "category": "Operations",
+    "text": "Cost monitoring for LLM applications requires tracking prompt tokens, completion tokens, model choice, retrieval overhead, and request volume. Cost per thousand queries is a useful normalized measure for comparing pipeline variants. A system with stronger answer quality may still be unsuitable if latency or cost exceeds product constraints."
+  }
+]
