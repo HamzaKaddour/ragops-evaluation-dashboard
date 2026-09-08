@@ -1,8 +1,11 @@
 # RAGOps Evaluation Dashboard
 
-A RAG evaluation and observability dashboard for analyzing retrieval quality, answer grounding, hallucination risk, latency, and cost across multiple Retrieval-Augmented Generation pipeline variants.
+A production-oriented RAG evaluation and observability project for measuring retrieval quality, answer support, failure modes, latency, and cost across multiple Retrieval-Augmented Generation pipeline variants.
 
-The project separates the evaluation layer from the user-facing interface. A lightweight Python pipeline reads a document corpus and labeled evaluation queries, computes retrieval metrics, exports structured JSON artifacts, and renders them through an interactive dashboard.
+The repository contains two execution paths:
+
+1. **Lightweight dashboard mode** for deterministic GitHub Pages deployment and CI.
+2. **Real retrieval mode** using BM25, SentenceTransformers, FAISS vector search, hybrid score fusion, and CrossEncoder reranking.
 
 ## Live application
 
@@ -10,93 +13,105 @@ The project separates the evaluation layer from the user-facing interface. A lig
 https://hamzakaddour.github.io/ragops-evaluation-dashboard/
 ```
 
-## Problem
+## Why this project exists
 
-Retrieval-Augmented Generation systems are often demonstrated through a chat interface, but the main engineering challenge is reliability. A production RAG workflow must answer several questions before deployment:
+A useful RAG system needs more than a chat interface. Before deployment, the engineering team should be able to answer:
 
-- Did the retriever find the right evidence?
-- Was the most relevant evidence ranked near the top?
-- Is the generated answer grounded in the retrieved context?
-- Are citations or supporting passages sufficient?
-- What failure modes appear across the evaluation set?
-- How much quality is gained or lost when latency and cost change?
+- Did the retriever find the correct evidence?
+- Did it rank useful evidence near the top?
+- Do dense and hybrid retrieval outperform lexical search?
+- Does reranking improve relevance enough to justify added latency?
+- Which queries fail because of missed context or weak ranking?
+- What quality/latency trade-offs appear across pipeline variants?
 
-This project focuses on the evaluation and observability layer needed to answer those questions.
+## Implemented retrieval stack
 
-## Core capabilities
+### Lexical retrieval
+- BM25 using `rank-bm25`
 
-- RAG pipeline comparison across keyword, dense-style, hybrid, and reranked retrieval variants.
-- Retrieval quality metrics: Recall@K, Precision@K, MRR, and nDCG.
-- Answer reliability metrics: groundedness, citation coverage, hallucination risk, and faithfulness-style indicators.
-- Query-level trace inspection with retrieved source snippets and evidence scores.
-- Operational metrics: latency, estimated token cost, and failure-mode distribution.
-- Reproducible artifact generation using lightweight Python scripts.
+### Dense retrieval
+- SentenceTransformer embeddings
+- default model: `sentence-transformers/all-MiniLM-L6-v2`
+- normalized embeddings
+- FAISS `IndexFlatIP` vector search
 
-## System architecture
+### Hybrid retrieval
+- BM25 lexical scores
+- dense semantic scores
+- score normalization
+- weighted lexical + dense fusion
+
+### Reranking
+- CrossEncoder reranking
+- default model: `cross-encoder/ms-marco-MiniLM-L-6-v2`
+
+Retrieval and reranking do **not** use evaluation labels when assigning document scores.
+
+## Evaluation metrics
+
+The reusable `ragops.metrics` package implements:
+
+- Recall@K
+- Precision@K
+- Mean Reciprocal Rank (MRR)
+- nDCG@K
+
+The dashboard also shows heuristic demo indicators for groundedness, citation coverage, hallucination risk, latency, and failure tags. These are visualization-oriented heuristics, not LLM-judge scores.
+
+## Architecture
 
 ```text
-data/
-  corpus.json                 Source document corpus
-  evaluation_queries.json     Labeled queries with relevant document IDs
-  evaluation_summary.json     Generated aggregate metrics
-  rag_runs.json               Generated query-level traces
-
-scripts/
-  generate_demo_artifacts.py  Evaluation artifact generator
-
-css/
-  styles.css                  Dashboard styling
-
-js/
-  app.js                      Interactive dashboard logic
-
-index.html                    Dashboard entry point
-.github/workflows/pages.yml   Deployment workflow
+corpus.json
+   |--------------------> BM25 ---------------------+
+   |                                               |
+   +--> SentenceTransformer --> FAISS ------------+--> Hybrid Fusion
+                                                   |        |
+                                                   |        v
+                                                   |   CrossEncoder
+                                                   |      Reranker
+                                                   |        |
+evaluation_queries.json ---------------------------+--------+
+                                                            |
+                                                            v
+                                                   Ranked Documents
+                                                            |
+                                                            v
+                                           Recall / Precision / MRR / nDCG
+                                                            |
+                                      +---------------------+------------------+
+                                      |                                        |
+                                      v                                        v
+                           real_evaluation_results.json              Dashboard artifacts
 ```
 
-## Evaluation methodology
+## Repository structure
 
-### 1. Labeled corpus and query set
+```text
+ragops/
+  metrics.py                     Ranking metrics
+  retrieval.py                   BM25, dense, hybrid and reranked retrieval
 
-The evaluation starts from a compact corpus in `data/corpus.json` and a labeled query set in `data/evaluation_queries.json`. Each query includes relevant document IDs and expected answer topics.
+scripts/
+  generate_demo_artifacts.py     Lightweight deterministic Pages artifacts
+  run_real_evaluation.py         Real retrieval evaluation runner
 
-### 2. Retrieval variants
+data/
+  corpus.json                    Source corpus
+  evaluation_queries.json        Labeled evaluation queries
+  evaluation_summary.json        Dashboard aggregate metrics
+  rag_runs.json                  Dashboard query traces
 
-The artifact generator compares four retrieval configurations:
+tests/
+  test_metrics.py                Metric tests
 
-- **BM25 baseline**: keyword-style retrieval.
-- **Dense embeddings**: semantic-style retrieval approximated with lightweight term-set similarity.
-- **Hybrid retrieval**: score fusion between keyword and semantic-style retrieval.
-- **Hybrid + reranker**: hybrid retrieval with an additional relevance-aware reranking bonus.
+requirements.txt                Lightweight Pages / CI dependencies
+requirements-real.txt           SentenceTransformers + FAISS + BM25 stack
+pyproject.toml                  Installable Python package
+.github/workflows/ci.yml        Automated tests
+.github/workflows/pages.yml     Static dashboard deployment
+```
 
-The current implementation is intentionally lightweight and deterministic. It does not require external APIs or a live vector database, but it preserves the structure of a real RAG evaluation workflow.
-
-### 3. Ranking metrics
-
-The script computes:
-
-- **Recall@5**: whether relevant evidence appears in the top five retrieved results.
-- **Precision@5**: how much of the retrieved top five is relevant.
-- **MRR**: how high the first relevant result appears.
-- **nDCG@5**: whether relevant documents are ranked near the top.
-
-### 4. Reliability metrics
-
-The dashboard estimates answer reliability using retrieval coverage and precision:
-
-- **Groundedness**: whether the answer is supported by retrieved evidence.
-- **Citation coverage**: whether the response has enough source support.
-- **Hallucination risk**: the inverse risk signal derived from grounding weakness.
-
-### 5. Operational metrics
-
-Each pipeline stores latency and cost estimates. This allows quality to be compared against serving constraints, which is important when a more accurate retrieval stack is slower or more expensive.
-
-### 6. Trace-level debugging
-
-Each query-level run stores the user query, retrieved source snippets, ranking scores, generated answer, metrics, and failure tags. This supports debugging beyond aggregate scores.
-
-## Running locally
+## Run the dashboard locally
 
 ```bash
 python -m venv .venv
@@ -106,30 +121,67 @@ python scripts/generate_demo_artifacts.py
 python -m http.server 8000
 ```
 
-Open:
+Open `http://localhost:8000`.
 
-```text
-http://localhost:8000
+## Run the real RAG retrieval evaluation
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements-real.txt
+pip install -e .
+python scripts/run_real_evaluation.py
 ```
 
-## Deployment
+The first run downloads the embedding and reranker model weights through Hugging Face. Results are written to:
 
-The GitHub Actions workflow regenerates evaluation artifacts before deploying the static dashboard. The deployed application reads the generated JSON files from the `data/` directory.
+```text
+data/real_evaluation_results.json
+```
 
-## Production extensions
+The real evaluator compares:
 
-A production version could replace the lightweight retrieval simulation with:
+```text
+BM25
+Dense + FAISS
+Hybrid BM25 + Dense
+Hybrid + CrossEncoder reranker
+```
 
-- real embedding models,
-- FAISS, Chroma, Qdrant, Weaviate, or OpenSearch,
-- LLM-based groundedness scoring,
-- prompt/version regression tests,
-- OpenTelemetry-style tracing,
-- authentication and dashboard-level access controls,
-- scheduled evaluation runs over real documents.
+## CI strategy
+
+GitHub Actions intentionally uses the lightweight dependency set. CI validates package installation, dashboard artifact generation, and ranking-metric tests without downloading large model weights on every Pages deployment.
+
+## Current scope and limitations
+
+Implemented:
+
+- real BM25 retrieval
+- real SentenceTransformer embeddings
+- real FAISS vector search
+- hybrid lexical/semantic score fusion
+- real CrossEncoder reranking
+- reusable ranking metrics
+- automated tests and CI
+- static evaluation dashboard
+
+Not yet implemented:
+
+- live LLM answer generation
+- LLM-as-judge groundedness/faithfulness scoring
+- prompt/version registry
+- persistent vector database service such as Qdrant or OpenSearch
+- OpenTelemetry tracing
+- production authentication
+- online feedback loops
+
+## Technology stack
+
+`Python` · `SentenceTransformers` · `Hugging Face` · `FAISS` · `BM25` · `CrossEncoder` · `NumPy` · `GitHub Actions` · `GitHub Pages`
 
 ## Repository topics
 
 ```text
-rag, llmops, retrieval-augmented-generation, semantic-search, ai-evaluation, embeddings, mlops, observability, github-pages, python
+rag, llm, llmops, retrieval-augmented-generation, sentence-transformers,
+faiss, semantic-search, reranking, ai-evaluation, mlops, observability, python
 ```
