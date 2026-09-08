@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragops-evaluation-dashboard"
+version = "0.2.0"
+description = "RAG retrieval evaluation and observability utilities"
+requires-python = ">=3.10"
+
+[tool.setuptools]
+packages = ["ragops"]
