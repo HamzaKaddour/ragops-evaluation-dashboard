@@ -367,7 +367,7 @@
         <p class="muted" id="traceHelp"></p>
       </div>
       <button class="button" id="tracesBtn">Load benchmark traces</button>
-      <div id="tracesBox" class="answer-box"><span class="muted">Traces are loaded on demand.</span></div>
+      <div id="tracesBox" class="answer-box"><span class="muted">Loading traces…</span></div>
     </div>
   </section>
 </main>
@@ -529,7 +529,7 @@ askBtn.addEventListener("click",async()=>{
   }
 });
 
-tracesBtn.addEventListener("click",async()=>{
+async function loadTraces(){
   tracesBtn.disabled=true;
   tracesBox.innerHTML='<span class="muted">Loading…</span>';
   try{
@@ -551,11 +551,14 @@ tracesBtn.addEventListener("click",async()=>{
   }finally{
     tracesBtn.disabled=false;
   }
-});
+}
+
+tracesBtn.addEventListener("click", loadTraces);
 
 loadBenchmark();
 loadReliabilityHistory();
 loadFinalRuns();
+loadTraces();
 </script>
 </body>
 </html>
