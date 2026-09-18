@@ -1,0 +1,35 @@
+{
+  "benchmark_scope": "Small purpose-built 12-query evaluation set (10 answerable, 2 intentionally unanswerable). Results are portfolio regression metrics, not production-wide performance claims.",
+  "versions": [
+    {
+      "version": "final-v1",
+      "groundedness": 0.58,
+      "citation_coverage": 0.189,
+      "citation_validity": 1,
+      "abstention_accuracy": 0.5,
+      "behavior_accuracy": 0.917,
+      "avg_total_ms": 10016.4,
+      "note": "Baseline full pipeline exposed weak citation coverage and unreliable abstention."
+    },
+    {
+      "version": "final-v2",
+      "groundedness": 0.847,
+      "citation_coverage": 0,
+      "citation_validity": null,
+      "abstention_accuracy": 1,
+      "behavior_accuracy": 0.917,
+      "avg_total_ms": 5487.9,
+      "note": "Retrieval-confidence gate improved abstention and latency, but model-emitted citations remained unreliable."
+    },
+    {
+      "version": "final-v3",
+      "groundedness": 0.917,
+      "citation_coverage": 0.95,
+      "citation_validity": 1,
+      "abstention_accuracy": 1,
+      "behavior_accuracy": 1,
+      "avg_total_ms": 5512.4,
+      "note": "Added deterministic source assignment and citation-aware grounding evaluation."
+    }
+  ]
+}
