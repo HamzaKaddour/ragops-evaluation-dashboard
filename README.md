@@ -12,9 +12,31 @@ This version adds a measured reliability iteration on top of the v1 benchmark:
 2. the default gate threshold is `-3.0`, calibrated against the repository's v1 benchmark and configurable with `RAGOPS_RERANK_THRESHOLD`;
 3. Qwen is prompted to attach citations to every factual sentence;
 4. groundedness ignores standalone citation fragments and removes citation tokens before semantic comparison;
-5. the final benchmark is now versioned as `final-v2`.
+5. the current published benchmark is versioned as `final-v3`.
 
 The sample corpus is also expanded so common RAG questions, including "What is retrieval-augmented generation?", are answerable from retrieved evidence.
+
+
+## Final benchmark results
+
+The current published `final-v3` benchmark uses a small purpose-built 12-query regression set: 10 answerable questions and 2 intentionally unanswerable questions. These metrics are intended to demonstrate observability, failure analysis, and measured iteration; they are not claims of broad production performance.
+
+| Metric | final-v1 | final-v2 | final-v3 |
+| --- | ---: | ---: | ---: |
+| Behavior accuracy | 91.7% | 91.7% | **100%** |
+| Groundedness | 58.0% | 84.7% | **91.7%** |
+| Citation validity | 100%* | N/A | **100%** |
+| Citation coverage | 18.9% | 0.0% | **95.0%** |
+| Abstention accuracy | 50.0% | **100%** | **100%** |
+| Avg. total latency | 10.0 s | 5.5 s | **5.5 s** |
+
+\* In v1, citation validity was computed only for responses that emitted citations; low citation coverage showed that citations were frequently missing.
+
+The main progression was:
+
+- **v1:** exposed weak grounding, citation coverage, and abstention behavior.
+- **v2:** added a CrossEncoder confidence gate, improving abstention and latency.
+- **v3:** added deterministic sentence-level source assignment and citation-aware groundedness scoring, substantially improving coverage while preserving valid citations.
 
 ## Architecture
 
@@ -92,7 +114,7 @@ The first real run downloads public Hugging Face model weights. They are cached 
 
 ## 1. Final end-to-end benchmark
 
-Run the authoritative workstation benchmark after pulling the latest v2 code:
+Run the authoritative workstation benchmark after pulling the latest code:
 
 ```bash
 python scripts/run_final_benchmark.py
