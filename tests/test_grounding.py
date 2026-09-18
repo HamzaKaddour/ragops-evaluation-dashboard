@@ -7,3 +7,10 @@ def test_detects_insufficient_evidence_abstention():
 
 def test_normal_answer_is_not_abstention():
     assert not is_abstention("RAG retrieves external evidence before generation [doc_01].")
+
+
+def test_citation_only_fragment_is_ignored():
+    from ragops.grounding import _sentences
+    assert _sentences("Supported statement [doc_01]. [doc_01]") == [
+        "Supported statement [doc_01]."
+    ]
