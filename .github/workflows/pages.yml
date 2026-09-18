@@ -27,6 +27,12 @@ jobs:
           mkdir -p static/data
           cp data/evaluation_summary.json static/data/evaluation_summary.json
           cp data/rag_runs.json static/data/rag_runs.json
+          if [ -f data/final_benchmark_summary.json ]; then
+            cp data/final_benchmark_summary.json static/data/final_benchmark_summary.json
+          fi
+          if [ -f data/final_benchmark_runs.json ]; then
+            cp data/final_benchmark_runs.json static/data/final_benchmark_runs.json
+          fi
 
       - uses: actions/configure-pages@v5
 
