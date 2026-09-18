@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ragops-evaluation-dashboard"
-version = "0.4.0"
+version = "0.5.0"
 description = "Local-first RAG evaluation and observability platform"
 requires-python = ">=3.10"
 
