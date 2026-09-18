@@ -1,12 +1,166 @@
 [
-  {"id":"q1","query":"What is retrieval augmented generation?","relevant_doc_ids":["doc_01","doc_02"],"expected_answer_topics":["retrieval","external knowledge","LLM","grounding"]},
-  {"id":"q2","query":"Which metrics should I use to evaluate RAG retrieval quality?","relevant_doc_ids":["doc_03"],"expected_answer_topics":["Recall@K","Precision@K","MRR","nDCG"]},
-  {"id":"q3","query":"Why combine BM25 and dense retrieval?","relevant_doc_ids":["doc_04","doc_05","doc_06"],"expected_answer_topics":["lexical retrieval","dense retrieval","hybrid fusion"]},
-  {"id":"q4","query":"What is the role of a CrossEncoder in a RAG pipeline?","relevant_doc_ids":["doc_09"],"expected_answer_topics":["reranking","query-document scoring","candidate list"]},
-  {"id":"q5","query":"How does FAISS fit into a RAG system?","relevant_doc_ids":["doc_05","doc_07","doc_08"],"expected_answer_topics":["embeddings","vector search","similarity"]},
-  {"id":"q6","query":"How can a RAG system reduce unsupported answers?","relevant_doc_ids":["doc_11","doc_13","doc_14","doc_15"],"expected_answer_topics":["grounding","citations","abstention"]},
-  {"id":"q7","query":"What should be logged for RAG observability?","relevant_doc_ids":["doc_16","doc_17","doc_18"],"expected_answer_topics":["query traces","scores","latency","metrics"]},
-  {"id":"q8","query":"Why should an evaluation set include unanswerable questions?","relevant_doc_ids":["doc_15","doc_20"],"expected_answer_topics":["abstention","hallucination","missing evidence"]},
-  {"id":"q9","query":"What factors matter when chunking documents for RAG?","relevant_doc_ids":["doc_10"],"expected_answer_topics":["chunk size","overlap","context","metadata"]},
-  {"id":"q10","query":"What are common RAG failure modes?","relevant_doc_ids":["doc_19"],"expected_answer_topics":["retrieval misses","ranking","citations","unsupported claims"]}
+  {
+    "id": "q1",
+    "query": "What is retrieval augmented generation?",
+    "relevant_doc_ids": [
+      "doc_01",
+      "doc_02"
+    ],
+    "expected_answer_topics": [
+      "retrieval",
+      "external knowledge",
+      "LLM",
+      "grounding"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q2",
+    "query": "Which metrics should I use to evaluate RAG retrieval quality?",
+    "relevant_doc_ids": [
+      "doc_03"
+    ],
+    "expected_answer_topics": [
+      "Recall@K",
+      "Precision@K",
+      "MRR",
+      "nDCG"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q3",
+    "query": "Why combine BM25 and dense retrieval?",
+    "relevant_doc_ids": [
+      "doc_04",
+      "doc_05",
+      "doc_06"
+    ],
+    "expected_answer_topics": [
+      "lexical retrieval",
+      "dense retrieval",
+      "hybrid fusion"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q4",
+    "query": "What is the role of a CrossEncoder in a RAG pipeline?",
+    "relevant_doc_ids": [
+      "doc_09"
+    ],
+    "expected_answer_topics": [
+      "reranking",
+      "query-document scoring",
+      "candidate list"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q5",
+    "query": "How does FAISS fit into a RAG system?",
+    "relevant_doc_ids": [
+      "doc_05",
+      "doc_07",
+      "doc_08"
+    ],
+    "expected_answer_topics": [
+      "embeddings",
+      "vector search",
+      "similarity"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q6",
+    "query": "How can a RAG system reduce unsupported answers?",
+    "relevant_doc_ids": [
+      "doc_11",
+      "doc_13",
+      "doc_14",
+      "doc_15"
+    ],
+    "expected_answer_topics": [
+      "grounding",
+      "citations",
+      "abstention"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q7",
+    "query": "What should be logged for RAG observability?",
+    "relevant_doc_ids": [
+      "doc_16",
+      "doc_17",
+      "doc_18"
+    ],
+    "expected_answer_topics": [
+      "query traces",
+      "scores",
+      "latency",
+      "metrics"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q8",
+    "query": "Why should an evaluation set include unanswerable questions?",
+    "relevant_doc_ids": [
+      "doc_15",
+      "doc_20"
+    ],
+    "expected_answer_topics": [
+      "abstention",
+      "hallucination",
+      "missing evidence"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q9",
+    "query": "What factors matter when chunking documents for RAG?",
+    "relevant_doc_ids": [
+      "doc_10"
+    ],
+    "expected_answer_topics": [
+      "chunk size",
+      "overlap",
+      "context",
+      "metadata"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q10",
+    "query": "What are common RAG failure modes?",
+    "relevant_doc_ids": [
+      "doc_19"
+    ],
+    "expected_answer_topics": [
+      "retrieval misses",
+      "ranking",
+      "citations",
+      "unsupported claims"
+    ],
+    "expected_answer_status": "answered"
+  },
+  {
+    "id": "q11",
+    "query": "Which cloud provider currently hosts this RAG system in production?",
+    "relevant_doc_ids": [],
+    "expected_answer_topics": [
+      "insufficient evidence"
+    ],
+    "expected_answer_status": "insufficient_evidence"
+  },
+  {
+    "id": "q12",
+    "query": "What is the monthly production hosting bill for this RAG system?",
+    "relevant_doc_ids": [],
+    "expected_answer_topics": [
+      "insufficient evidence"
+    ],
+    "expected_answer_status": "insufficient_evidence"
+  }
 ]
