@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 
 from .citations import validate_citations
+from .confidence import ABSTENTION_ANSWER, assess_retrieval_confidence
 from .generation import LocalGenerator
 from .grounding import GroundingEvaluator, is_abstention
 from .retrieval import HybridRetriever
@@ -25,9 +26,18 @@ class RAGPipeline:
         sources = self.retriever.hybrid_rerank(question, k=top_k)
         retrieval_ms = (time.perf_counter() - r0) * 1000
 
-        g0 = time.perf_counter()
-        generated = self.generator.generate(question, sources)
-        generation_ms = (time.perf_counter() - g0) * 1000
+        confidence = assess_retrieval_confidence(sources)
+
+        if confidence["sufficient_evidence"]:
+            g0 = time.perf_counter()
+            generated = self.generator.generate(question, sources)
+            generation_ms = (time.perf_counter() - g0) * 1000
+        else:
+            generated = {
+                "answer": ABSTENTION_ANSWER,
+                "model": "retrieval-confidence-gate",
+            }
+            generation_ms = 0.0
 
         abstained = is_abstention(generated["answer"])
         citation_metrics = validate_citations(
@@ -36,7 +46,11 @@ class RAGPipeline:
             abstained=abstained,
         )
         grounding_metrics = self.grounding.evaluate(generated["answer"], sources)
-        metrics = {**citation_metrics, **grounding_metrics}
+        metrics = {
+            **citation_metrics,
+            **grounding_metrics,
+            "retrieval_confidence": confidence,
+        }
         total_ms = (time.perf_counter() - started) * 1000
 
         public_sources = [
