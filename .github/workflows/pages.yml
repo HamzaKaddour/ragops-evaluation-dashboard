@@ -3,13 +3,16 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
   group: pages
   cancel-in-progress: false
+
 jobs:
   deploy:
     environment:
@@ -18,10 +21,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare static portfolio artifacts
+        run: |
+          mkdir -p static/data
+          cp data/evaluation_summary.json static/data/evaluation_summary.json
+          cp data/rag_runs.json static/data/rag_runs.json
+
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./static
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
