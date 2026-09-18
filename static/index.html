@@ -7,99 +7,21 @@
   <style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 34px 20px 64px;
-      background: #0b1020;
-      color: #eef2ff;
-    }
-    h1 { margin: 0 0 8px; font-size: 2rem; }
-    h2 { margin: 0 0 12px; }
-    h3 { margin: 14px 0 8px; }
-    .muted { color: #aab3cc; }
-    .ok { color: #86efac; }
-    .warn { color: #fbbf24; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .card {
-      background: #151b2f;
-      border: 1px solid #2a3350;
-      border-radius: 14px;
-      padding: 20px;
-      margin: 16px 0;
-    }
-    .metric {
-      background: #0f1528;
-      border: 1px solid #27304a;
-      border-radius: 10px;
-      padding: 14px;
-    }
-    .metric .value { font-size: 1.35rem; font-weight: 700; margin-top: 4px; }
-    textarea, input {
-      width: 100%;
-      background: #0f1528;
-      color: #eef2ff;
-      border: 1px solid #394566;
-      border-radius: 8px;
-      padding: 12px;
-    }
-    button {
-      margin-top: 10px;
-      background: #6d5dfc;
-      color: white;
-      border: 0;
-      border-radius: 8px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button:hover { filter: brightness(1.08); }
-    pre {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      background: #0f1528;
-      padding: 14px;
-      border-radius: 8px;
-      border: 1px solid #27304a;
-    }
-    code { color: #c4b5fd; }
-    .pill {
-      display: inline-block;
-      padding: 4px 9px;
-      margin: 2px;
-      border: 1px solid #3f4a68;
-      border-radius: 999px;
-      font-size: .85rem;
-    }
-    .answer-box {
-      background: #0f1528;
-      border: 1px solid #27304a;
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 12px;
-    }
-    .source {
-      padding: 10px 0;
-      border-top: 1px solid #27304a;
-    }
-    .source:first-child { border-top: 0; }
-    .trace {
-      padding: 12px 0;
-      border-top: 1px solid #27304a;
-    }
-    .trace:first-child { border-top: 0; }
-    .small { font-size: .9rem; }
+    body { font-family: Inter, system-ui, sans-serif; max-width:1180px; margin:0 auto; padding:34px 20px 64px; background:#0b1020; color:#eef2ff; }
+    h1{margin:0 0 8px;font-size:2rem} h2{margin:0 0 12px} h3{margin:16px 0 8px}
+    .muted{color:#aab3cc}.ok{color:#86efac}.warn{color:#fbbf24}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
+    .card{background:#151b2f;border:1px solid #2a3350;border-radius:14px;padding:20px;margin:16px 0}
+    .metric{background:#0f1528;border:1px solid #27304a;border-radius:10px;padding:14px}
+    .metric .value{font-size:1.35rem;font-weight:700;margin-top:4px}
+    textarea,input,select{width:100%;background:#0f1528;color:#eef2ff;border:1px solid #394566;border-radius:8px;padding:12px}
+    button{margin-top:10px;background:#6d5dfc;color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600}
+    button:hover{filter:brightness(1.08)}
+    .pill{display:inline-block;padding:4px 9px;margin:2px;border:1px solid #3f4a68;border-radius:999px;font-size:.85rem}
+    .answer-box{background:#0f1528;border:1px solid #27304a;border-radius:10px;padding:16px;margin-top:12px}
+    .source,.trace{padding:10px 0;border-top:1px solid #27304a}.source:first-child,.trace:first-child{border-top:0}
+    .small{font-size:.9rem} code{color:#c4b5fd}
   </style>
 </head>
 <body>
@@ -110,15 +32,9 @@
     <div class="card">
       <h2>Architecture</h2>
       <p>Local-first RAG system with lexical/dense retrieval, reranking, local generation, abstention-aware evaluation, citation checks, and query tracing.</p>
-      <span class="pill">BM25</span>
-      <span class="pill">FAISS</span>
-      <span class="pill">SentenceTransformers</span>
-      <span class="pill">CrossEncoder</span>
-      <span class="pill">Qwen</span>
-      <span class="pill">FastAPI</span>
-      <span class="pill">SQLite</span>
+      <span class="pill">BM25</span><span class="pill">FAISS</span><span class="pill">SentenceTransformers</span>
+      <span class="pill">CrossEncoder</span><span class="pill">Qwen</span><span class="pill">FastAPI</span><span class="pill">SQLite</span>
     </div>
-
     <div class="card">
       <h2>Runtime mode</h2>
       <p id="modeText" class="muted"></p>
@@ -127,208 +43,158 @@
   </div>
 
   <div class="card">
-    <h2>Evaluation snapshot</h2>
-    <p class="muted">Portfolio benchmark artifacts generated from the repository evaluation set. These are static on GitHub Pages and are separate from live workstation inference.</p>
-    <div id="summaryMetrics" class="metrics-grid">
-      <div class="metric"><span class="muted">Loading evaluation summary...</span></div>
-    </div>
+    <h2>Final benchmark</h2>
+    <p id="benchmarkNote" class="muted">Looking for final workstation benchmark artifacts...</p>
+    <div id="summaryMetrics" class="metrics-grid"></div>
     <div id="pipelineSummary"></div>
   </div>
 
   <div class="card">
-    <h2 id="queryTitle">RAG query</h2>
+    <h2>RAG query</h2>
     <p id="queryHelp" class="muted"></p>
-
-    <textarea id="question" rows="3">What is retrieval augmented generation?</textarea>
-    <label for="topK">Top K</label>
-    <input id="topK" type="number" min="1" max="8" value="3" />
-
+    <div id="pagesSelectorWrap" style="display:none">
+      <label for="recordedQuery">Recorded benchmark query</label>
+      <select id="recordedQuery"></select>
+    </div>
+    <div id="localQueryWrap">
+      <textarea id="question" rows="3">What is retrieval augmented generation?</textarea>
+      <label for="topK">Top K</label>
+      <input id="topK" type="number" min="1" max="8" value="3" />
+    </div>
     <button id="askBtn">Run query</button>
     <p id="status" class="muted"></p>
-
-    <div id="result" class="answer-box">
-      <span class="muted">No query run yet.</span>
-    </div>
+    <div id="result" class="answer-box"><span class="muted">No query selected yet.</span></div>
   </div>
 
   <div class="card">
-    <h2 id="traceTitle">Evaluation traces</h2>
+    <h2>Evaluation traces</h2>
     <p id="traceHelp" class="muted"></p>
     <button id="tracesBtn">Load traces</button>
-    <div id="traces" class="answer-box">
-      <span class="muted">No traces loaded.</span>
-    </div>
+    <div id="traces" class="answer-box"><span class="muted">No traces loaded.</span></div>
   </div>
 
 <script>
-  const local = ["127.0.0.1", "localhost"].includes(window.location.hostname);
-  const modeText = document.getElementById("modeText");
-  const modeDetail = document.getElementById("modeDetail");
-  const askBtn = document.getElementById("askBtn");
-  const tracesBtn = document.getElementById("tracesBtn");
-  const status = document.getElementById("status");
-  const result = document.getElementById("result");
-  const traces = document.getElementById("traces");
+const local = ["127.0.0.1","localhost"].includes(window.location.hostname);
+const modeText=document.getElementById("modeText"),modeDetail=document.getElementById("modeDetail");
+const askBtn=document.getElementById("askBtn"),tracesBtn=document.getElementById("tracesBtn");
+const status=document.getElementById("status"),result=document.getElementById("result"),traces=document.getElementById("traces");
+const pct=v=>v==null?"—":Math.round(v*100)+"%";
+let finalRuns=[];
 
-  const recordedWorkstationRun = {
-    query: "What is retrieval augmented generation?",
-    answer_status: "insufficient_evidence",
-    answer: "The question could not be answered from the earlier retrieved context, so the local Qwen model abstained instead of inventing unsupported information.",
-    model: "Qwen/Qwen2.5-1.5B-Instruct",
-    metrics: {
-      groundedness_score: 0.5,
-      citation_count: 0,
-      citation_validity: null,
-      retrieval_ms: 62.5,
-      generation_ms: 8194,
-      total_ms: 8285.4
-    },
-    sources: [
-      { title: "Hybrid Retrieval", score: 0.782 },
-      { title: "Grounded Generation", score: 0.7737 },
-      { title: "Evaluating Retrieval Quality", score: 0.8081 }
-    ],
-    note: "Recorded workstation run from the full local FastAPI + FAISS + CrossEncoder + Qwen pipeline. The corpus has since been expanded to improve answerability."
-  };
+if(local){
+  modeText.innerHTML='<span class="ok">Local API mode:</span> live FastAPI + local Qwen inference is enabled.';
+  modeDetail.innerHTML='Swagger docs: <code>/docs</code>.';
+  document.getElementById("queryHelp").textContent="Runs the full local retrieval + reranking + generation pipeline.";
+  document.getElementById("traceHelp").textContent="Loads recent SQLite-backed local traces.";
+  askBtn.textContent="Ask local RAG"; tracesBtn.textContent="Load local traces";
+}else{
+  modeText.innerHTML='<span class="warn">GitHub Pages mode:</span> showing committed workstation benchmark artifacts.';
+  modeDetail.textContent="The public site does not host Qwen; recorded benchmark outputs are displayed here.";
+  document.getElementById("queryHelp").textContent="Choose a real workstation benchmark query and inspect its recorded answer, citations, sources, and latency.";
+  document.getElementById("traceHelp").textContent="Loads the final benchmark query-level runs when available.";
+  document.getElementById("localQueryWrap").style.display="none";
+  document.getElementById("pagesSelectorWrap").style.display="block";
+  askBtn.textContent="Show benchmark run"; tracesBtn.textContent="Load benchmark traces";
+}
 
-  if (local) {
-    modeText.innerHTML = '<span class="ok">Local API mode:</span> live FastAPI + local model queries are enabled.';
-    modeDetail.innerHTML = 'Swagger API docs: <code>/docs</code>. Queries are executed against the workstation backend and written to SQLite traces.';
-    askBtn.textContent = "Ask local RAG";
-    tracesBtn.textContent = "Load local traces";
-    document.getElementById("queryHelp").textContent = "This request runs BM25 + dense retrieval + reranking + Qwen generation on the workstation.";
-    document.getElementById("traceHelp").textContent = "Loads recent SQLite-backed local API traces.";
-  } else {
-    modeText.innerHTML = '<span class="warn">GitHub Pages demo mode:</span> recorded evaluation artifacts are interactive; the Qwen backend itself is not hosted on Pages.';
-    modeDetail.textContent = "Use the buttons below to inspect a recorded workstation run and repository evaluation traces. Run FastAPI locally for live inference.";
-    askBtn.textContent = "Show recorded RAG run";
-    tracesBtn.textContent = "Load evaluation traces";
-    document.getElementById("queryHelp").textContent = "GitHub Pages cannot execute Python/Qwen. This button presents a recorded full-pipeline workstation run.";
-    document.getElementById("traceHelp").textContent = "Loads evaluation traces packaged with the static deployment.";
-  }
+function renderQuery(data,demo=false){
+  const m=data.metrics||{},lat=data.latency_ms||{},sources=data.sources||[];
+  result.innerHTML=`
+    <h3>Answer</h3><p>${data.answer||"No answer returned."}</p>
+    <div class="metrics-grid">
+      <div class="metric"><div class="muted">Status</div><div class="value">${data.answer_status||"answered"}</div></div>
+      <div class="metric"><div class="muted">Groundedness</div><div class="value">${pct(m.groundedness_score)}</div></div>
+      <div class="metric"><div class="muted">Citation validity</div><div class="value">${m.citation_validity==null?"N/A":pct(m.citation_validity)}</div></div>
+      <div class="metric"><div class="muted">Citation coverage</div><div class="value">${m.citation_coverage==null?"N/A":pct(m.citation_coverage)}</div></div>
+      <div class="metric"><div class="muted">Total latency</div><div class="value">${lat.total??"—"} ms</div></div>
+    </div>
+    <h3>Retrieved sources</h3>
+    <div>${sources.map((s,i)=>`<div class="source"><strong>${i+1}. ${s.title||s.id}</strong><div class="muted small">score ${s.score??"—"}${s.rerank_score!=null?" · rerank "+s.rerank_score:""}</div></div>`).join("")||'<span class="muted">No sources.</span>'}</div>
+    ${demo?'<p class="muted small">Recorded workstation benchmark result; no live inference is running on GitHub Pages.</p>':""}
+  `;
+}
 
-  function pct(v) {
-    return v == null ? "—" : Math.round(v * 100) + "%";
-  }
-
-  function renderQuery(data, demo=false) {
-    const metrics = data.metrics || {};
-    const sources = data.sources || [];
-    const latency = data.latency_ms || {};
-    const total = metrics.total_ms ?? latency.total ?? "—";
-    const grounding = metrics.groundedness_score ?? "—";
-    const citationValidity = metrics.citation_validity;
-
-    result.innerHTML = `
-      <h3>Answer</h3>
-      <p>${data.answer || "No answer returned."}</p>
-      <div class="metrics-grid">
-        <div class="metric"><div class="muted">Status</div><div class="value">${data.answer_status || "answered"}</div></div>
-        <div class="metric"><div class="muted">Groundedness</div><div class="value">${typeof grounding === "number" ? pct(grounding) : grounding}</div></div>
-        <div class="metric"><div class="muted">Citation validity</div><div class="value">${citationValidity == null ? "N/A" : pct(citationValidity)}</div></div>
-        <div class="metric"><div class="muted">Total latency</div><div class="value">${total === "—" ? "—" : total + " ms"}</div></div>
-      </div>
-      <h3>Retrieved sources</h3>
-      <div>${sources.length ? sources.map((s,i)=>`
-        <div class="source">
-          <strong>${i+1}. ${s.title || s.id || "Source"}</strong>
-          <div class="muted small">score: ${s.score ?? "—"}${s.rerank_score != null ? " · rerank: " + s.rerank_score : ""}</div>
-        </div>
-      `).join("") : '<span class="muted">No source details available.</span>'}</div>
-      ${demo ? '<p class="muted small">Recorded local run; no live model inference is occurring on GitHub Pages.</p>' : ''}
-      ${data.note ? '<p class="muted small">' + data.note + '</p>' : ''}
-    `;
-  }
-
-  async function loadSummary() {
-    try {
-      const response = await fetch("./data/evaluation_summary.json");
-      if (!response.ok) throw new Error("summary unavailable");
-      const data = await response.json();
-      const m = data.summary_metrics || {};
-      document.getElementById("summaryMetrics").innerHTML = `
-        <div class="metric"><div class="muted">Queries evaluated</div><div class="value">${m.queries_evaluated ?? "—"}</div></div>
-        <div class="metric"><div class="muted">Recall@5</div><div class="value">${pct(m.avg_recall_at_5)}</div></div>
-        <div class="metric"><div class="muted">Groundedness</div><div class="value">${pct(m.avg_groundedness)}</div></div>
-        <div class="metric"><div class="muted">Hallucination risk</div><div class="value">${pct(m.avg_hallucination_risk)}</div></div>
-        <div class="metric"><div class="muted">Avg latency</div><div class="value">${m.avg_latency_ms ?? "—"} ms</div></div>
-      `;
-      const pipelines = data.pipelines || [];
-      document.getElementById("pipelineSummary").innerHTML = pipelines.length ? `
-        <h3>Pipeline comparison</h3>
-        ${pipelines.map(p=>`
-          <div class="source">
-            <strong>${p.name}</strong>
-            <div class="muted small">Recall@5 ${pct(p.recall_at_5)} · MRR ${pct(p.mrr)} · nDCG@5 ${pct(p.ndcg_at_5)} · Groundedness ${pct(p.groundedness)} · ${p.avg_latency_ms} ms</div>
-          </div>
-        `).join("")}
-      ` : "";
-    } catch (err) {
-      document.getElementById("summaryMetrics").innerHTML = '<div class="metric"><span class="muted">Evaluation summary unavailable.</span></div>';
+async function loadBenchmark(){
+  try{
+    const r=await fetch("./data/final_benchmark_summary.json");
+    if(!r.ok) throw new Error();
+    const d=await r.json(),e=d.end_to_end||{};
+    document.getElementById("benchmarkNote").innerHTML='<span class="ok">Final workstation benchmark loaded.</span> Generated '+new Date(d.generated_at).toLocaleString()+'.';
+    document.getElementById("summaryMetrics").innerHTML=`
+      <div class="metric"><div class="muted">Queries</div><div class="value">${e.queries_evaluated??"—"}</div></div>
+      <div class="metric"><div class="muted">Behavior accuracy</div><div class="value">${pct(e.behavior_accuracy)}</div></div>
+      <div class="metric"><div class="muted">Groundedness</div><div class="value">${pct(e.avg_groundedness)}</div></div>
+      <div class="metric"><div class="muted">Citation validity</div><div class="value">${pct(e.avg_citation_validity)}</div></div>
+      <div class="metric"><div class="muted">Citation coverage</div><div class="value">${pct(e.avg_citation_coverage)}</div></div>
+      <div class="metric"><div class="muted">Abstention accuracy</div><div class="value">${pct(e.abstention_accuracy)}</div></div>
+      <div class="metric"><div class="muted">Avg total latency</div><div class="value">${e.avg_total_ms??"—"} ms</div></div>`;
+    document.getElementById("pipelineSummary").innerHTML='<h3>Retrieval comparison</h3>'+ (d.retrieval_pipelines||[]).map(p=>
+      `<div class="source"><strong>${p.name}</strong><div class="muted small">Recall@5 ${pct(p.recall_at_k)} · Precision@5 ${pct(p.precision_at_k)} · MRR ${pct(p.mrr)} · nDCG@5 ${pct(p.ndcg_at_k)} · ${p.avg_latency_ms} ms</div></div>`
+    ).join("");
+  }catch(e){
+    document.getElementById("benchmarkNote").innerHTML='<span class="warn">Final workstation benchmark not committed yet.</span> Run <code>python scripts/run_final_benchmark.py</code> on the workstation, then commit the generated JSON files.';
+    const r=await fetch("./data/evaluation_summary.json");
+    if(r.ok){
+      const d=await r.json(),m=d.summary_metrics||{};
+      document.getElementById("summaryMetrics").innerHTML=`
+        <div class="metric"><div class="muted">Legacy demo queries</div><div class="value">${m.queries_evaluated??"—"}</div></div>
+        <div class="metric"><div class="muted">Legacy Recall@5</div><div class="value">${pct(m.avg_recall_at_5)}</div></div>`;
     }
   }
+}
 
-  askBtn.addEventListener("click", async () => {
-    const query = document.getElementById("question").value.trim();
-    const top_k = Number(document.getElementById("topK").value || 3);
-    if (!query) return;
+async function loadFinalRuns(){
+  if(local) return;
+  try{
+    const r=await fetch("./data/final_benchmark_runs.json");
+    if(!r.ok) throw new Error();
+    finalRuns=await r.json();
+    const select=document.getElementById("recordedQuery");
+    select.innerHTML=finalRuns.map((x,i)=>`<option value="${i}">${x.query}</option>`).join("");
+    const firstAnswered=finalRuns.findIndex(x=>x.answer_status==="answered");
+    if(firstAnswered>=0) select.value=String(firstAnswered);
+  }catch(e){
+    document.getElementById("recordedQuery").innerHTML='<option>Final benchmark not available yet</option>';
+    askBtn.disabled=true;
+  }
+}
 
-    askBtn.disabled = true;
-    status.textContent = local ? "Running retrieval + generation..." : "Loading recorded workstation result...";
-
-    try {
-      if (!local) {
-        await new Promise(resolve => setTimeout(resolve, 250));
-        renderQuery(recordedWorkstationRun, true);
-        status.textContent = "Recorded full-pipeline run loaded.";
-        return;
-      }
-
-      const response = await fetch("/query", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({query, top_k})
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "request failed");
-      renderQuery(data, false);
-      status.textContent = `Live query complete in ${data?.latency_ms?.total ?? "?"} ms.`;
-    } catch (err) {
-      result.innerHTML = '<span class="warn">' + String(err) + '</span>';
-      status.textContent = "Request failed.";
-    } finally {
-      askBtn.disabled = false;
+askBtn.addEventListener("click",async()=>{
+  askBtn.disabled=true;
+  try{
+    if(!local){
+      const i=Number(document.getElementById("recordedQuery").value);
+      const run=finalRuns[i];
+      if(!run) throw new Error("No benchmark run available.");
+      renderQuery(run,true); status.textContent="Recorded benchmark run loaded."; return;
     }
-  });
+    status.textContent="Running retrieval + generation...";
+    const query=document.getElementById("question").value.trim(),top_k=Number(document.getElementById("topK").value||3);
+    const r=await fetch("/query",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query,top_k})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.detail||"request failed");
+    renderQuery(d,false); status.textContent=`Live query complete in ${d?.latency_ms?.total??"?"} ms.`;
+  }catch(e){result.innerHTML='<span class="warn">'+String(e)+'</span>';status.textContent="Request failed."}
+  finally{askBtn.disabled=false}
+});
 
-  tracesBtn.addEventListener("click", async () => {
-    tracesBtn.disabled = true;
-    traces.innerHTML = '<span class="muted">Loading...</span>';
-    try {
-      const endpoint = local ? "/traces?limit=10" : "./data/rag_runs.json";
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error("trace data unavailable");
-      const payload = await response.json();
-      const items = Array.isArray(payload) ? payload : (payload.traces || payload.items || []);
+tracesBtn.addEventListener("click",async()=>{
+  tracesBtn.disabled=true; traces.innerHTML='<span class="muted">Loading...</span>';
+  try{
+    const endpoint=local?"/traces?limit=20":"./data/final_benchmark_runs.json";
+    const r=await fetch(endpoint); if(!r.ok) throw new Error("trace data unavailable");
+    const p=await r.json(),items=Array.isArray(p)?p:(p.traces||p.items||[]);
+    traces.innerHTML=items.map((t,i)=>{
+      const m=t.metrics||{};
+      return `<div class="trace"><strong>${i+1}. ${t.query||"Query"}</strong>
+      <div class="muted small">Status: ${t.answer_status||"—"} · Groundedness: ${pct(m.groundedness_score??m.groundedness)} · Citation validity: ${m.citation_validity==null?"N/A":pct(m.citation_validity)} · Latency: ${t?.latency_ms?.total??m.latency_ms??"—"} ms</div>
+      <div class="small">${t.answer||""}</div></div>`;
+    }).join("")||'<span class="muted">No traces found.</span>';
+  }catch(e){traces.innerHTML='<span class="warn">'+String(e)+'</span>'}
+  finally{tracesBtn.disabled=false}
+});
 
-      traces.innerHTML = items.length ? items.map((t, i) => {
-        const m = t.metrics || {};
-        return `
-          <div class="trace">
-            <strong>${i+1}. ${t.query || "Query"}</strong>
-            <div class="muted small">Pipeline: ${t.pipeline || t.model || "local RAG"} · Groundedness: ${m.groundedness != null ? pct(m.groundedness) : (m.groundedness_score != null ? pct(m.groundedness_score) : "—")} · Latency: ${m.latency_ms ?? t?.latency_ms?.total ?? "—"} ms</div>
-            <div class="small">${t.answer || ""}</div>
-          </div>
-        `;
-      }).join("") : '<span class="muted">No traces found.</span>';
-    } catch (err) {
-      traces.innerHTML = '<span class="warn">' + String(err) + '</span>';
-    } finally {
-      tracesBtn.disabled = false;
-    }
-  });
-
-  loadSummary();
+loadBenchmark();
+loadFinalRuns();
 </script>
 </body>
 </html>
