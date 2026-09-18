@@ -60,6 +60,61 @@ class GroundingEvaluator:
 
         self.model = SentenceTransformer(model_name, device=device)
 
+    def attach_source_citations(
+        self,
+        answer: str,
+        contexts: list[dict],
+        min_similarity: float = 0.45,
+    ) -> str:
+        """Attach one best-supported retrieved source citation per factual sentence.
+
+        This is a deterministic post-generation citation layer. It only cites a
+        retrieved source when semantic support clears the same weak-support
+        threshold used by groundedness evaluation. Abstentions are returned
+        unchanged.
+        """
+        if is_abstention(answer) or not contexts:
+            return answer
+
+        sentences = _sentences(answer)
+        if not sentences:
+            return answer
+
+        context_texts = [c["text"] for c in contexts]
+        context_embeddings = self.model.encode(
+            context_texts,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+        )
+
+        cited_sentences: list[str] = []
+        for sentence in sentences:
+            clean = _clean_for_embedding(sentence)
+            if not clean:
+                continue
+
+            emb = self.model.encode(
+                [clean],
+                convert_to_numpy=True,
+                normalize_embeddings=True,
+            )[0]
+            sims = context_embeddings @ emb
+            best_idx = int(np.argmax(sims))
+            best_score = float(sims[best_idx])
+
+            # Remove any model-emitted citations first, then attach the
+            # strongest retrieved source only when semantic support exists.
+            base = CITATION_RE.sub("", sentence).strip()
+            if best_score >= min_similarity:
+                citation = f"[{contexts[best_idx]['id']}]"
+                if base and base[-1] in ".!?":
+                    base = f"{base[:-1].rstrip()} {citation}{base[-1]}"
+                else:
+                    base = f"{base} {citation}"
+            cited_sentences.append(base)
+
+        return " ".join(cited_sentences).strip()
+
     def evaluate(
         self,
         answer: str,
