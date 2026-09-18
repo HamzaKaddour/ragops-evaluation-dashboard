@@ -19,4 +19,4 @@ jobs:
           pip install fastapi httpx pytest numpy
           pip install -e . --no-deps
       - name: Run lightweight tests
-        run: pytest -q tests/test_metrics.py tests/test_citations.py tests/test_grounding.py tests/test_api.py
+        run: pytest -q tests/test_metrics.py tests/test_citations.py tests/test_grounding.py tests/test_confidence.py tests/test_api.py
