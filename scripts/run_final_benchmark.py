@@ -127,6 +127,9 @@ def evaluate_generation(
             generation_ms = 0.0
 
         answer = generated["answer"]
+        if confidence["sufficient_evidence"] and not is_abstention(answer):
+            answer = grounding.attach_source_citations(answer, sources)
+
         abstained = is_abstention(answer)
         citations = validate_citations(
             answer,
@@ -254,7 +257,7 @@ def main() -> None:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "benchmark_version": "final-v2",
+        "benchmark_version": "final-v3",
         "top_k_generation": args.top_k,
         "retrieval_k": 5,
         "models": {
