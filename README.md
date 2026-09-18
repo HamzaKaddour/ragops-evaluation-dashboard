@@ -4,7 +4,7 @@ A local-first RAG evaluation and observability platform built with BM25, Sentenc
 
 ## Current version
 
-`v0.5.0`
+`v0.6.0`
 
 This version adds a measured reliability iteration on top of the v1 benchmark:
 
@@ -329,3 +329,14 @@ python scripts/run_final_benchmark.py
 ```
 
 The generated benchmark JSON files overwrite the previous final artifacts. Inspect them before committing.
+
+
+## Reliability v3
+
+v3 keeps the retrieval-confidence gate from v2 and adds deterministic citation assignment after generation. Each factual sentence is compared against retrieved passages with the same SentenceTransformer model used for groundedness. A source citation is attached only when semantic similarity clears the weak-support threshold (`0.45` by default).
+
+This separates two responsibilities:
+- Qwen generates a concise grounded answer.
+- the evaluation layer verifies sentence support and attaches a retrieved source ID only when support is strong enough.
+
+The final benchmark output is versioned as `final-v3`.
