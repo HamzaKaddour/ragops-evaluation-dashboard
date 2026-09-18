@@ -23,6 +23,7 @@
     .answer-box{background:#0f1528;border:1px solid #27304a;border-radius:10px;padding:16px;margin-top:12px}
     .source,.trace{padding:10px 0;border-top:1px solid #27304a}.source:first-child,.trace:first-child{border-top:0}
     .small{font-size:.9rem} code{color:#c4b5fd}
+    .history-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92rem}.history-table th,.history-table td{padding:10px;border-top:1px solid #27304a;text-align:left}.history-table th{color:#cbd5e1}.good{color:#86efac;font-weight:700}
   </style>
 </head>
 <body>
@@ -48,6 +49,12 @@
     <p id="benchmarkNote" class="muted">Looking for final workstation benchmark artifacts...</p>
     <div id="summaryMetrics" class="metrics-grid"></div>
     <div id="pipelineSummary"></div>
+  </div>
+
+  <div class="card">
+    <h2>Reliability progression</h2>
+    <p class="muted">Measured regression history from the same small portfolio evaluation set. The purpose is to show failure analysis and iterative improvement, not to claim production-wide accuracy.</p>
+    <div id="reliabilityHistory"><span class="muted">Loading reliability history...</span></div>
   </div>
 
   <div class="card">
@@ -194,6 +201,33 @@ tracesBtn.addEventListener("click",async()=>{
   finally{tracesBtn.disabled=false}
 });
 
+async function loadReliabilityHistory(){
+  try{
+    const r=await fetch("./data/reliability_history.json?v="+Date.now(), {cache:"no-store"});
+    if(!r.ok) throw new Error();
+    const d=await r.json();
+    const rows=(d.versions||[]).map(v=>`
+      <tr>
+        <td><strong>${v.version}</strong></td>
+        <td>${pct(v.behavior_accuracy)}</td>
+        <td>${pct(v.groundedness)}</td>
+        <td>${v.citation_validity==null?"N/A":pct(v.citation_validity)}</td>
+        <td>${pct(v.citation_coverage)}</td>
+        <td>${pct(v.abstention_accuracy)}</td>
+        <td>${(v.avg_total_ms/1000).toFixed(1)} s</td>
+      </tr>`).join("");
+    document.getElementById("reliabilityHistory").innerHTML=`
+      <table class="history-table">
+        <thead><tr><th>Version</th><th>Behavior</th><th>Groundedness</th><th>Citation validity</th><th>Citation coverage</th><th>Abstention</th><th>Latency</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="small muted">${d.benchmark_scope||""}</p>`;
+  }catch(e){
+    document.getElementById("reliabilityHistory").innerHTML='<span class="muted">Reliability history unavailable.</span>';
+  }
+}
+
+loadReliabilityHistory();
 loadBenchmark();
 loadFinalRuns();
 </script>
