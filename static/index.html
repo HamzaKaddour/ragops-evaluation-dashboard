@@ -6,16 +6,100 @@
   <title>RAGOps Evaluation Dashboard</title>
   <style>
     :root { color-scheme: dark; }
-    body { font-family: Inter, system-ui, sans-serif; max-width: 1100px; margin: 0 auto; padding: 36px 20px 60px; background:#0b1020; color:#eef2ff; }
-    h1 { margin-bottom: 8px; } h2 { margin-top: 0; }
-    .muted { color:#aab3cc; } .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
-    .card { background:#151b2f; border:1px solid #2a3350; border-radius:14px; padding:20px; margin:16px 0; }
-    textarea, input { width:100%; box-sizing:border-box; background:#0f1528; color:#eef2ff; border:1px solid #394566; border-radius:8px; padding:12px; }
-    button { margin-top:10px; background:#6d5dfc; color:white; border:0; border-radius:8px; padding:10px 16px; cursor:pointer; font-weight:600; }
-    button:disabled { opacity:.45; cursor:not-allowed; }
-    pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#0f1528; padding:14px; border-radius:8px; border:1px solid #27304a; }
-    code { color:#c4b5fd; } .ok { color:#86efac; } .warn { color:#fbbf24; }
-    .pill { display:inline-block; padding:4px 9px; margin:2px; border:1px solid #3f4a68; border-radius:999px; font-size:.85rem; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 20px 64px;
+      background: #0b1020;
+      color: #eef2ff;
+    }
+    h1 { margin: 0 0 8px; font-size: 2rem; }
+    h2 { margin: 0 0 12px; }
+    h3 { margin: 14px 0 8px; }
+    .muted { color: #aab3cc; }
+    .ok { color: #86efac; }
+    .warn { color: #fbbf24; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .card {
+      background: #151b2f;
+      border: 1px solid #2a3350;
+      border-radius: 14px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .metric {
+      background: #0f1528;
+      border: 1px solid #27304a;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .metric .value { font-size: 1.35rem; font-weight: 700; margin-top: 4px; }
+    textarea, input {
+      width: 100%;
+      background: #0f1528;
+      color: #eef2ff;
+      border: 1px solid #394566;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    button {
+      margin-top: 10px;
+      background: #6d5dfc;
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { filter: brightness(1.08); }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #0f1528;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #27304a;
+    }
+    code { color: #c4b5fd; }
+    .pill {
+      display: inline-block;
+      padding: 4px 9px;
+      margin: 2px;
+      border: 1px solid #3f4a68;
+      border-radius: 999px;
+      font-size: .85rem;
+    }
+    .answer-box {
+      background: #0f1528;
+      border: 1px solid #27304a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .source {
+      padding: 10px 0;
+      border-top: 1px solid #27304a;
+    }
+    .source:first-child { border-top: 0; }
+    .trace {
+      padding: 12px 0;
+      border-top: 1px solid #27304a;
+    }
+    .trace:first-child { border-top: 0; }
+    .small { font-size: .9rem; }
   </style>
 </head>
 <body>
@@ -25,80 +109,226 @@
   <div class="grid">
     <div class="card">
       <h2>Architecture</h2>
-      <p>Local-first RAG system with real lexical/dense retrieval, reranking, local generation, abstention-aware evaluation, and query tracing.</p>
-      <span class="pill">BM25</span><span class="pill">FAISS</span><span class="pill">SentenceTransformers</span><span class="pill">CrossEncoder</span><span class="pill">Qwen</span><span class="pill">FastAPI</span>
+      <p>Local-first RAG system with lexical/dense retrieval, reranking, local generation, abstention-aware evaluation, citation checks, and query tracing.</p>
+      <span class="pill">BM25</span>
+      <span class="pill">FAISS</span>
+      <span class="pill">SentenceTransformers</span>
+      <span class="pill">CrossEncoder</span>
+      <span class="pill">Qwen</span>
+      <span class="pill">FastAPI</span>
+      <span class="pill">SQLite</span>
     </div>
+
     <div class="card">
       <h2>Runtime mode</h2>
       <p id="modeText" class="muted"></p>
-      <p>API docs: <code>/docs</code> when running locally through FastAPI.</p>
+      <p id="modeDetail" class="small muted"></p>
     </div>
   </div>
 
   <div class="card">
-    <h2>Live local query</h2>
-    <p class="muted">This form is enabled when the page is served by the local FastAPI backend. The public GitHub Pages version remains a static portfolio view.</p>
-    <textarea id="question" rows="3">What is retrieval augmented generation?</textarea>
-    <label for="topK">Top K</label>
-    <input id="topK" type="number" min="1" max="8" value="3" />
-    <button id="askBtn">Ask local RAG</button>\n    <p id="localOnlyNote" class="muted" style="display:none">Interactive RAG requires the local FastAPI + Qwen backend. GitHub Pages is the static portfolio deployment.</p>
-    <p id="status" class="muted"></p>
-    <pre id="answer">No query run yet.</pre>
+    <h2>Evaluation snapshot</h2>
+    <p class="muted">Portfolio benchmark artifacts generated from the repository evaluation set. These are static on GitHub Pages and are separate from live workstation inference.</p>
+    <div id="summaryMetrics" class="metrics-grid">
+      <div class="metric"><span class="muted">Loading evaluation summary...</span></div>
+    </div>
+    <div id="pipelineSummary"></div>
   </div>
 
   <div class="card">
-    <h2>Recent local traces</h2>
+    <h2 id="queryTitle">RAG query</h2>
+    <p id="queryHelp" class="muted"></p>
+
+    <textarea id="question" rows="3">What is retrieval augmented generation?</textarea>
+    <label for="topK">Top K</label>
+    <input id="topK" type="number" min="1" max="8" value="3" />
+
+    <button id="askBtn">Run query</button>
+    <p id="status" class="muted"></p>
+
+    <div id="result" class="answer-box">
+      <span class="muted">No query run yet.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="traceTitle">Evaluation traces</h2>
+    <p id="traceHelp" class="muted"></p>
     <button id="tracesBtn">Load traces</button>
-    <pre id="traces">No traces loaded.</pre>
+    <div id="traces" class="answer-box">
+      <span class="muted">No traces loaded.</span>
+    </div>
   </div>
 
 <script>
   const local = ["127.0.0.1", "localhost"].includes(window.location.hostname);
   const modeText = document.getElementById("modeText");
+  const modeDetail = document.getElementById("modeDetail");
   const askBtn = document.getElementById("askBtn");
   const tracesBtn = document.getElementById("tracesBtn");
-  modeText.innerHTML = local
-    ? '<span class="ok">Local API mode:</span> interactive queries are enabled.'
-    : '<span class="warn">GitHub Pages mode:</span> static portfolio only. Run FastAPI locally for live queries.';
-  askBtn.disabled = !local;
-  tracesBtn.disabled = !local;
+  const status = document.getElementById("status");
+  const result = document.getElementById("result");
+  const traces = document.getElementById("traces");
+
+  const recordedWorkstationRun = {
+    query: "What is retrieval augmented generation?",
+    answer_status: "insufficient_evidence",
+    answer: "The question could not be answered from the earlier retrieved context, so the local Qwen model abstained instead of inventing unsupported information.",
+    model: "Qwen/Qwen2.5-1.5B-Instruct",
+    metrics: {
+      groundedness_score: 0.5,
+      citation_count: 0,
+      citation_validity: null,
+      retrieval_ms: 62.5,
+      generation_ms: 8194,
+      total_ms: 8285.4
+    },
+    sources: [
+      { title: "Hybrid Retrieval", score: 0.782 },
+      { title: "Grounded Generation", score: 0.7737 },
+      { title: "Evaluating Retrieval Quality", score: 0.8081 }
+    ],
+    note: "Recorded workstation run from the full local FastAPI + FAISS + CrossEncoder + Qwen pipeline. The corpus has since been expanded to improve answerability."
+  };
+
+  if (local) {
+    modeText.innerHTML = '<span class="ok">Local API mode:</span> live FastAPI + local model queries are enabled.';
+    modeDetail.innerHTML = 'Swagger API docs: <code>/docs</code>. Queries are executed against the workstation backend and written to SQLite traces.';
+    askBtn.textContent = "Ask local RAG";
+    tracesBtn.textContent = "Load local traces";
+    document.getElementById("queryHelp").textContent = "This request runs BM25 + dense retrieval + reranking + Qwen generation on the workstation.";
+    document.getElementById("traceHelp").textContent = "Loads recent SQLite-backed local API traces.";
+  } else {
+    modeText.innerHTML = '<span class="warn">GitHub Pages demo mode:</span> recorded evaluation artifacts are interactive; the Qwen backend itself is not hosted on Pages.';
+    modeDetail.textContent = "Use the buttons below to inspect a recorded workstation run and repository evaluation traces. Run FastAPI locally for live inference.";
+    askBtn.textContent = "Show recorded RAG run";
+    tracesBtn.textContent = "Load evaluation traces";
+    document.getElementById("queryHelp").textContent = "GitHub Pages cannot execute Python/Qwen. This button presents a recorded full-pipeline workstation run.";
+    document.getElementById("traceHelp").textContent = "Loads evaluation traces packaged with the static deployment.";
+  }
+
+  function pct(v) {
+    return v == null ? "—" : Math.round(v * 100) + "%";
+  }
+
+  function renderQuery(data, demo=false) {
+    const metrics = data.metrics || {};
+    const sources = data.sources || [];
+    const latency = data.latency_ms || {};
+    const total = metrics.total_ms ?? latency.total ?? "—";
+    const grounding = metrics.groundedness_score ?? "—";
+    const citationValidity = metrics.citation_validity;
+
+    result.innerHTML = `
+      <h3>Answer</h3>
+      <p>${data.answer || "No answer returned."}</p>
+      <div class="metrics-grid">
+        <div class="metric"><div class="muted">Status</div><div class="value">${data.answer_status || "answered"}</div></div>
+        <div class="metric"><div class="muted">Groundedness</div><div class="value">${typeof grounding === "number" ? pct(grounding) : grounding}</div></div>
+        <div class="metric"><div class="muted">Citation validity</div><div class="value">${citationValidity == null ? "N/A" : pct(citationValidity)}</div></div>
+        <div class="metric"><div class="muted">Total latency</div><div class="value">${total === "—" ? "—" : total + " ms"}</div></div>
+      </div>
+      <h3>Retrieved sources</h3>
+      <div>${sources.length ? sources.map((s,i)=>`
+        <div class="source">
+          <strong>${i+1}. ${s.title || s.id || "Source"}</strong>
+          <div class="muted small">score: ${s.score ?? "—"}${s.rerank_score != null ? " · rerank: " + s.rerank_score : ""}</div>
+        </div>
+      `).join("") : '<span class="muted">No source details available.</span>'}</div>
+      ${demo ? '<p class="muted small">Recorded local run; no live model inference is occurring on GitHub Pages.</p>' : ''}
+      ${data.note ? '<p class="muted small">' + data.note + '</p>' : ''}
+    `;
+  }
+
+  async function loadSummary() {
+    try {
+      const response = await fetch("./data/evaluation_summary.json");
+      if (!response.ok) throw new Error("summary unavailable");
+      const data = await response.json();
+      const m = data.summary_metrics || {};
+      document.getElementById("summaryMetrics").innerHTML = `
+        <div class="metric"><div class="muted">Queries evaluated</div><div class="value">${m.queries_evaluated ?? "—"}</div></div>
+        <div class="metric"><div class="muted">Recall@5</div><div class="value">${pct(m.avg_recall_at_5)}</div></div>
+        <div class="metric"><div class="muted">Groundedness</div><div class="value">${pct(m.avg_groundedness)}</div></div>
+        <div class="metric"><div class="muted">Hallucination risk</div><div class="value">${pct(m.avg_hallucination_risk)}</div></div>
+        <div class="metric"><div class="muted">Avg latency</div><div class="value">${m.avg_latency_ms ?? "—"} ms</div></div>
+      `;
+      const pipelines = data.pipelines || [];
+      document.getElementById("pipelineSummary").innerHTML = pipelines.length ? `
+        <h3>Pipeline comparison</h3>
+        ${pipelines.map(p=>`
+          <div class="source">
+            <strong>${p.name}</strong>
+            <div class="muted small">Recall@5 ${pct(p.recall_at_5)} · MRR ${pct(p.mrr)} · nDCG@5 ${pct(p.ndcg_at_5)} · Groundedness ${pct(p.groundedness)} · ${p.avg_latency_ms} ms</div>
+          </div>
+        `).join("")}
+      ` : "";
+    } catch (err) {
+      document.getElementById("summaryMetrics").innerHTML = '<div class="metric"><span class="muted">Evaluation summary unavailable.</span></div>';
+    }
+  }
 
   askBtn.addEventListener("click", async () => {
     const query = document.getElementById("question").value.trim();
     const top_k = Number(document.getElementById("topK").value || 3);
-    const status = document.getElementById("status");
-    const answer = document.getElementById("answer");
     if (!query) return;
-    status.textContent = "Running retrieval + generation...";
+
     askBtn.disabled = true;
+    status.textContent = local ? "Running retrieval + generation..." : "Loading recorded workstation result...";
+
     try {
+      if (!local) {
+        await new Promise(resolve => setTimeout(resolve, 250));
+        renderQuery(recordedWorkstationRun, true);
+        status.textContent = "Recorded full-pipeline run loaded.";
+        return;
+      }
+
       const response = await fetch("/query", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({query, top_k})
       });
       const data = await response.json();
-      answer.textContent = JSON.stringify(data, null, 2);
-      status.textContent = response.ok ? `Done in ${data?.latency_ms?.total ?? "?"} ms` : `Request failed (${response.status})`;
+      if (!response.ok) throw new Error(data.detail || "request failed");
+      renderQuery(data, false);
+      status.textContent = `Live query complete in ${data?.latency_ms?.total ?? "?"} ms.`;
     } catch (err) {
-      answer.textContent = String(err);
+      result.innerHTML = '<span class="warn">' + String(err) + '</span>';
       status.textContent = "Request failed.";
     } finally {
-      askBtn.disabled = !local;
+      askBtn.disabled = false;
     }
   });
 
   tracesBtn.addEventListener("click", async () => {
-    const out = document.getElementById("traces");
-    out.textContent = "Loading...";
+    tracesBtn.disabled = true;
+    traces.innerHTML = '<span class="muted">Loading...</span>';
     try {
-      const response = await fetch("/traces?limit=10");
-      const data = await response.json();
-      out.textContent = JSON.stringify(data, null, 2);
+      const endpoint = local ? "/traces?limit=10" : "./data/rag_runs.json";
+      const response = await fetch(endpoint);
+      if (!response.ok) throw new Error("trace data unavailable");
+      const payload = await response.json();
+      const items = Array.isArray(payload) ? payload : (payload.traces || payload.items || []);
+
+      traces.innerHTML = items.length ? items.map((t, i) => {
+        const m = t.metrics || {};
+        return `
+          <div class="trace">
+            <strong>${i+1}. ${t.query || "Query"}</strong>
+            <div class="muted small">Pipeline: ${t.pipeline || t.model || "local RAG"} · Groundedness: ${m.groundedness != null ? pct(m.groundedness) : (m.groundedness_score != null ? pct(m.groundedness_score) : "—")} · Latency: ${m.latency_ms ?? t?.latency_ms?.total ?? "—"} ms</div>
+            <div class="small">${t.answer || ""}</div>
+          </div>
+        `;
+      }).join("") : '<span class="muted">No traces found.</span>';
     } catch (err) {
-      out.textContent = String(err);
+      traces.innerHTML = '<span class="warn">' + String(err) + '</span>';
+    } finally {
+      tracesBtn.disabled = false;
     }
   });
+
+  loadSummary();
 </script>
 </body>
 </html>
