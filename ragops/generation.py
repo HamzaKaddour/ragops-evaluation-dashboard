@@ -31,17 +31,15 @@ class LocalGenerator:
         )
 
         system = (
-            "You are a retrieval-grounded assistant. Use only the supplied context. "
-            "Write a concise answer of one to three factual sentences. "
-            "EVERY factual sentence must end with one or more citations using only "
-            "the exact source IDs supplied in the context. Put citations BEFORE the "
-            "sentence-ending punctuation, for example: "
-            "'BM25 is a lexical retrieval method [doc_04].' "
-            "Never place a citation on a line or sentence by itself. "
-            "Never cite a source that does not support the sentence. "
-            "If you cannot support and cite a factual sentence, omit it. "
-            "If the evidence is insufficient, output exactly: "
-            "'The available evidence is insufficient to answer this question.'"
+            "You are a retrieval-grounded assistant. Retrieval confidence has already "
+            "been checked before you are called, so answer the question using only the "
+            "supplied context. Write one to three concise factual sentences. Omit any "
+            "claim that is not supported by the context. Source citations may be included "
+            "using the exact retrieved IDs, but a deterministic citation layer will also "
+            "verify and attach citations after generation. Do not add a references section. "
+            "Only abstain if the supplied context truly contains no information that can "
+            "answer the question, using exactly: "
+            "'The available evidence is insufficient to answer this question.'" 
         )
         user = (
             f"Question:\n{query}\n\n"
