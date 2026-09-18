@@ -39,13 +39,17 @@ class RAGPipeline:
             }
             generation_ms = 0.0
 
-        abstained = is_abstention(generated["answer"])
+        answer = generated["answer"]
+        if confidence["sufficient_evidence"] and not is_abstention(answer):
+            answer = self.grounding.attach_source_citations(answer, sources)
+
+        abstained = is_abstention(answer)
         citation_metrics = validate_citations(
-            generated["answer"],
+            answer,
             {s["id"] for s in sources},
             abstained=abstained,
         )
-        grounding_metrics = self.grounding.evaluate(generated["answer"], sources)
+        grounding_metrics = self.grounding.evaluate(answer, sources)
         metrics = {
             **citation_metrics,
             **grounding_metrics,
@@ -67,7 +71,7 @@ class RAGPipeline:
 
         self.traces.add(
             query=question,
-            answer=generated["answer"],
+            answer=answer,
             sources=public_sources,
             metrics=metrics,
             retrieval_ms=retrieval_ms,
@@ -78,7 +82,7 @@ class RAGPipeline:
         return {
             "query": question,
             "answer_status": metrics["answer_status"],
-            "answer": generated["answer"],
+            "answer": answer,
             "model": generated["model"],
             "sources": public_sources,
             "metrics": metrics,
