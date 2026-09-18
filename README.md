@@ -4,7 +4,7 @@ A local-first RAG evaluation and observability platform built with BM25, Sentenc
 
 ## Current version
 
-`v0.3.0`
+`v0.4.0`
 
 This version fixes three important evaluation issues:
 
@@ -88,7 +88,34 @@ pip install -e .
 
 The first real run downloads public Hugging Face model weights. They are cached locally for later runs.
 
-## 1. Retrieval benchmark
+## 1. Final end-to-end benchmark
+
+Run the authoritative workstation benchmark:
+
+```bash
+python scripts/run_final_benchmark.py
+```
+
+It evaluates BM25, dense FAISS, hybrid, and hybrid + CrossEncoder retrieval, then runs the complete Hybrid + CrossEncoder + Qwen generation pipeline over the labeled evaluation set, including explicit unanswerable cases for abstention testing.
+
+Outputs:
+
+```text
+data/final_benchmark_summary.json
+data/final_benchmark_runs.json
+```
+
+These two files are the artifacts used by the public GitHub Pages dashboard after you commit them.
+
+For a quick smoke test before the full run:
+
+```bash
+python scripts/run_final_benchmark.py --limit 2
+```
+
+Do not commit the limited smoke-test outputs as final benchmark results.
+
+## 2. Retrieval-only benchmark
 
 ```bash
 python scripts/run_real_evaluation.py
@@ -100,13 +127,13 @@ This evaluates BM25, dense FAISS retrieval, hybrid retrieval, and hybrid + Cross
 data/real_evaluation_results.json
 ```
 
-## 2. Local LLM smoke test
+## 3. Local LLM smoke test
 
 ```bash
 python scripts/test_local_llm.py
 ```
 
-## 3. CLI
+## 4. CLI
 
 ```bash
 python scripts/query_cli.py
@@ -114,7 +141,7 @@ python scripts/query_cli.py
 
 Type `exit` to quit.
 
-## 4. FastAPI + local web app
+## 5. FastAPI + local web app
 
 ```bash
 uvicorn api.app:app --host 0.0.0.0 --port 8000
@@ -200,7 +227,7 @@ The repository has two deployment modes:
 
 ### GitHub Pages — public static site
 
-`.github/workflows/pages.yml` publishes only `static/`.
+`.github/workflows/pages.yml` publishes `static/` plus committed benchmark JSON artifacts from `data/`.
 
 The Pages site is always online and free within your GitHub plan. It intentionally does not run Qwen or FastAPI because GitHub Pages is static hosting.
 
@@ -237,3 +264,17 @@ The public Pages site will be static. The local interactive API remains availabl
 ## Requirements
 
 All runtime dependencies are listed in `requirements.txt`. No paid API credentials are required.
+
+
+## Publishing the final benchmark
+
+After the full workstation benchmark completes, inspect the two generated JSON files and then publish them:
+
+```bash
+git status
+git add data/final_benchmark_summary.json data/final_benchmark_runs.json
+git commit -m "bench: publish final workstation RAG benchmark"
+git push origin main
+```
+
+GitHub Pages will automatically redeploy. The dashboard prefers the final benchmark artifacts when they exist and falls back to the legacy demo summary only when they are absent.
