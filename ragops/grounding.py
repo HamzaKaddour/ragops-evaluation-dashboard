@@ -16,9 +16,22 @@ ABSTENTION_PATTERNS = (
     "retrieved context does not support",
 )
 
+CITATION_RE = re.compile(r"\[[A-Za-z0-9_-]+\]")
+CITATION_ONLY_RE = re.compile(r"^(?:\s*\[[A-Za-z0-9_-]+\]\s*)+$")
+
 
 def _sentences(text: str) -> list[str]:
-    return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if len(s.strip()) > 3]
+    candidates = [
+        s.strip()
+        for s in re.split(r"(?<=[.!?])\s+", text)
+        if len(s.strip()) > 3
+    ]
+    return [s for s in candidates if not CITATION_ONLY_RE.fullmatch(s)]
+
+
+def _clean_for_embedding(sentence: str) -> str:
+    """Remove citation markers so they do not distort semantic similarity."""
+    return re.sub(r"\s+", " ", CITATION_RE.sub("", sentence)).strip()
 
 
 def is_abstention(text: str) -> bool:
@@ -37,9 +50,6 @@ class GroundingEvaluator:
         model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
         device: str | None = None,
     ) -> None:
-        # Lazy import keeps lightweight CI/tests independent of the heavy
-        # SentenceTransformers/PyTorch runtime. The dependency is required only
-        # when semantic grounding evaluation is actually instantiated.
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError as exc:
@@ -59,11 +69,12 @@ class GroundingEvaluator:
     ) -> dict:
         sentences = _sentences(answer)
         abstained = is_abstention(answer)
+
         if not sentences:
             return {
                 "answer_status": "insufficient_evidence" if abstained else "answered",
                 "abstained": abstained,
-                "groundedness_score": 0.0,
+                "groundedness_score": 1.0 if abstained else 0.0,
                 "supported_sentences": 0,
                 "weak_sentences": 0,
                 "unsupported_sentences": 0,
@@ -96,8 +107,10 @@ class GroundingEvaluator:
             convert_to_numpy=True,
             normalize_embeddings=True,
         )
+
+        semantic_sentences = [_clean_for_embedding(s) for s in sentences]
         sentence_embeddings = self.model.encode(
-            sentences,
+            semantic_sentences,
             convert_to_numpy=True,
             normalize_embeddings=True,
         )
