@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-18T18:26:05.644447+00:00",
-  "benchmark_version": "final-v1",
+  "generated_at": "2026-09-18T18:44:03.770723+00:00",
+  "benchmark_version": "final-v2",
   "top_k_generation": 3,
   "retrieval_k": 5,
   "models": {
@@ -25,7 +25,7 @@
       "precision_at_k": 0.28,
       "mrr": 0.783,
       "ndcg_at_k": 0.727,
-      "avg_latency_ms": 6.1
+      "avg_latency_ms": 6.7
     },
     {
       "name": "Hybrid",
@@ -34,7 +34,7 @@
       "precision_at_k": 0.3,
       "mrr": 0.933,
       "ndcg_at_k": 0.777,
-      "avg_latency_ms": 5.7
+      "avg_latency_ms": 6.1
     },
     {
       "name": "Hybrid + CrossEncoder",
@@ -43,20 +43,21 @@
       "precision_at_k": 0.3,
       "mrr": 0.933,
       "ndcg_at_k": 0.772,
-      "avg_latency_ms": 45.2
+      "avg_latency_ms": 40.4
     }
   ],
   "end_to_end": {
     "queries_evaluated": 12,
-    "answered": 11,
-    "abstained": 1,
+    "answered": 9,
+    "abstained": 3,
     "behavior_accuracy": 0.917,
-    "abstention_accuracy": 0.5,
-    "avg_groundedness": 0.58,
-    "avg_citation_validity": 1.0,
-    "avg_citation_coverage": 0.189,
-    "avg_retrieval_ms": 47.0,
-    "avg_generation_ms": 9941.4,
-    "avg_total_ms": 10016.4
+    "abstention_accuracy": 1.0,
+    "avg_groundedness": 0.847,
+    "avg_citation_validity": null,
+    "avg_citation_coverage": 0.0,
+    "avg_retrieval_ms": 45.5,
+    "avg_generation_ms": 5414.5,
+    "avg_total_ms": 5487.9,
+    "confidence_gated_abstentions": 2
   }
 }
