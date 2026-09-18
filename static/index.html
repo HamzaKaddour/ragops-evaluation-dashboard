@@ -3,158 +3,494 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RAGOps Evaluation Dashboard</title>
+  <meta name="description" content="A local-first Retrieval-Augmented Generation system with hybrid search, reranking, grounded generation, citation checks, abstention, and evaluation." />
+  <title>RAGOps — Retrieval, Generation & Evaluation</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; }
-    body { font-family: Inter, system-ui, sans-serif; max-width:1180px; margin:0 auto; padding:34px 20px 64px; background:#0b1020; color:#eef2ff; }
-    h1{margin:0 0 8px;font-size:2rem} h2{margin:0 0 12px} h3{margin:16px 0 8px}
-    .muted{color:#aab3cc}.ok{color:#86efac}.warn{color:#fbbf24}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
-    .card{background:#151b2f;border:1px solid #2a3350;border-radius:14px;padding:20px;margin:16px 0}
-    .metric{background:#0f1528;border:1px solid #27304a;border-radius:10px;padding:14px}
-    .metric .value{font-size:1.35rem;font-weight:700;margin-top:4px}
-    textarea,input,select{width:100%;background:#0f1528;color:#eef2ff;border:1px solid #394566;border-radius:8px;padding:12px}
-    button{margin-top:10px;background:#6d5dfc;color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600}
-    button:hover{filter:brightness(1.08)}
-    .pill{display:inline-block;padding:4px 9px;margin:2px;border:1px solid #3f4a68;border-radius:999px;font-size:.85rem}
-    .answer-box{background:#0f1528;border:1px solid #27304a;border-radius:10px;padding:16px;margin-top:12px}
-    .source,.trace{padding:10px 0;border-top:1px solid #27304a}.source:first-child,.trace:first-child{border-top:0}
-    .small{font-size:.9rem} code{color:#c4b5fd}
-    .history-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92rem}.history-table th,.history-table td{padding:10px;border-top:1px solid #27304a;text-align:left}.history-table th{color:#cbd5e1}.good{color:#86efac;font-weight:700}
+    :root{
+      color-scheme:dark;
+      --bg:#0b0f17;
+      --panel:#111722;
+      --panel-2:#151d2a;
+      --line:#263142;
+      --line-soft:#1c2634;
+      --text:#f3f6fb;
+      --muted:#9aa7b9;
+      --accent:#8b7cf6;
+      --accent-soft:#211d43;
+      --green:#79d7a5;
+      --amber:#e8bd66;
+      --max:1120px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      line-height:1.6;
+    }
+    a{color:inherit}
+    .wrap{width:min(var(--max),calc(100% - 40px));margin:0 auto}
+    .site-header{
+      position:sticky;top:0;z-index:10;
+      border-bottom:1px solid rgba(38,49,66,.85);
+      background:rgba(11,15,23,.92);
+      backdrop-filter:blur(14px);
+    }
+    .nav{height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;text-decoration:none;letter-spacing:-.01em}
+    .brand-mark{width:28px;height:28px;border-radius:8px;border:1px solid #3a4560;background:var(--panel-2);display:grid;place-items:center;color:#d9d4ff;font-size:.82rem}
+    .nav-links{display:flex;gap:20px;font-size:.9rem;color:var(--muted)}
+    .nav-links a{text-decoration:none}.nav-links a:hover{color:var(--text)}
+    .hero{padding:86px 0 52px}
+    .eyebrow{color:#b9afff;font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}
+    h1{font-size:clamp(2.5rem,6vw,4.8rem);line-height:1.03;letter-spacing:-.055em;max-width:900px;margin:14px 0 22px}
+    .hero-copy{max-width:760px;font-size:1.12rem;color:#b4bfd0;margin:0 0 30px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+    .button{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:42px;padding:0 15px;border-radius:9px;
+      border:1px solid var(--line);background:var(--panel);color:var(--text);
+      text-decoration:none;font-weight:650;font-size:.92rem;cursor:pointer;
+    }
+    .button.primary{background:var(--accent);border-color:var(--accent);color:white}
+    .button:hover{filter:brightness(1.07)}
+    .mode-strip{
+      margin-top:34px;padding:13px 16px;border:1px solid var(--line);
+      border-radius:10px;background:#0e141e;color:var(--muted);font-size:.9rem
+    }
+    .mode-strip strong{color:var(--text)}
+    section{padding:42px 0}
+    .section-head{max-width:760px;margin-bottom:24px}
+    .kicker{font-size:.78rem;color:#a89ef8;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+    h2{font-size:clamp(1.65rem,3vw,2.35rem);line-height:1.15;letter-spacing:-.035em;margin:8px 0 10px}
+    h3{font-size:1rem;margin:0 0 7px;letter-spacing:-.01em}
+    p{margin:0 0 14px}
+    .muted{color:var(--muted)}
+    .small{font-size:.88rem}
+    .grid-2,.grid-3,.grid-4{display:grid;gap:14px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:21px;
+    }
+    .card.subtle{background:#0e141e}
+    .rag-definition{
+      display:grid;grid-template-columns:1.1fr .9fr;gap:16px;
+      padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--panel)
+    }
+    .definition{
+      font-size:1.18rem;line-height:1.55;color:#dce3ee
+    }
+    .plain-box{
+      background:#0d131c;border:1px solid var(--line-soft);border-radius:12px;padding:18px
+    }
+    .flow{
+      display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px
+    }
+    .step{
+      position:relative;min-height:142px;padding:16px;border:1px solid var(--line);
+      border-radius:12px;background:var(--panel)
+    }
+    .step-num{
+      width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+      background:var(--accent-soft);color:#c8c1ff;font-weight:700;font-size:.76rem;margin-bottom:14px
+    }
+    .stack-card .role{color:var(--muted);font-size:.88rem;line-height:1.5}
+    .stack-card code{display:inline-block;margin-top:8px;color:#c9c2ff;font-size:.82rem}
+    .metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .metric{
+      padding:17px;border:1px solid var(--line);border-radius:12px;background:#0e141e
+    }
+    .metric-label{color:var(--muted);font-size:.79rem;text-transform:uppercase;letter-spacing:.055em}
+    .metric-value{font-size:1.65rem;font-weight:760;letter-spacing:-.04em;margin-top:3px}
+    .metric-note{font-size:.78rem;color:var(--muted);margin-top:4px}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+    table{width:100%;border-collapse:collapse;min-width:760px;background:var(--panel)}
+    th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line-soft);font-size:.88rem}
+    th{color:#c5cfdd;font-weight:650;background:#0f1520}
+    tr:last-child td{border-bottom:0}
+    .good{color:var(--green);font-weight:700}
+    .warn{color:var(--amber)}
+    .pill-row{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{padding:5px 9px;border:1px solid #344057;border-radius:999px;color:#c8d1df;font-size:.78rem}
+    .demo-shell{
+      border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden
+    }
+    .demo-head{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:17px 20px;border-bottom:1px solid var(--line);background:#0f1520
+    }
+    .demo-body{padding:20px}
+    label{display:block;margin:12px 0 6px;font-size:.82rem;color:#b3becd;font-weight:650}
+    select,textarea,input{
+      width:100%;background:#0b111a;color:var(--text);border:1px solid #344057;
+      border-radius:9px;padding:11px 12px;font:inherit
+    }
+    textarea{resize:vertical;min-height:92px}
+    .answer-box{margin-top:16px;padding:18px;border-radius:12px;background:#0c121b;border:1px solid var(--line-soft)}
+    .answer-box h3{margin-top:18px}.answer-box h3:first-child{margin-top:0}
+    .source,.trace{padding:12px 0;border-top:1px solid var(--line-soft)}
+    .source:first-child,.trace:first-child{border-top:0}
+    .trace-answer{margin-top:6px;color:#c5cfdd}
+    details{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:0 16px}
+    details+details{margin-top:9px}
+    summary{cursor:pointer;padding:14px 0;font-weight:650}
+    details p{color:var(--muted);padding-bottom:14px}
+    .footer{padding:50px 0 70px;color:var(--muted);font-size:.88rem}
+    code{color:#c8c1ff}
+    @media(max-width:920px){
+      .flow{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .grid-4,.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .rag-definition{grid-template-columns:1fr}
+    }
+    @media(max-width:680px){
+      .wrap{width:min(var(--max),calc(100% - 26px))}
+      .nav-links{display:none}
+      .hero{padding-top:58px}
+      .grid-2,.grid-3,.grid-4,.metric-grid,.flow{grid-template-columns:1fr}
+      .demo-head{align-items:flex-start;flex-direction:column}
+    }
   </style>
 </head>
 <body>
-  <h1>RAGOps Evaluation Dashboard</h1>
-  <p class="muted">BM25 + SentenceTransformers + FAISS → Hybrid Fusion → CrossEncoder → Qwen → Citation & Grounding Checks → SQLite Traces</p>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <span class="brand-mark">R</span>
+      <span>RAGOps</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#about">Overview</a>
+      <a href="#how">How it works</a>
+      <a href="#stack">Stack</a>
+      <a href="#results">Results</a>
+      <a href="#demo">Demo</a>
+    </nav>
+  </div>
+</header>
 
-  <div class="grid">
-    <div class="card">
-      <h2>Architecture</h2>
-      <p>Local-first RAG system with lexical/dense retrieval, reranking, local generation, abstention-aware evaluation, citation checks, and query tracing.</p>
-      <span class="pill">BM25</span><span class="pill">FAISS</span><span class="pill">SentenceTransformers</span>
-      <span class="pill">CrossEncoder</span><span class="pill">Qwen</span><span class="pill">FastAPI</span><span class="pill">SQLite</span>
+<main id="top">
+  <div class="wrap hero">
+    <div class="eyebrow">Retrieval-Augmented Generation · Evaluation · Observability</div>
+    <h1>A small RAG system built to be inspected, measured, and improved.</h1>
+    <p class="hero-copy">
+      This project combines keyword and semantic search, reranking, a local language model,
+      source citations, confidence-based abstention, and query tracing. The goal is not just
+      to produce an answer, but to show where that answer came from and how the system behaved.
+    </p>
+    <div class="hero-actions">
+      <a class="button primary" href="#demo">Explore recorded runs</a>
+      <a class="button" href="#how">See the pipeline</a>
     </div>
-    <div class="card">
-      <h2>Runtime mode</h2>
-      <p id="modeText" class="muted"></p>
-      <p id="modeDetail" class="small muted"></p>
+    <div class="mode-strip" id="modeText">Loading runtime information…</div>
+  </div>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">First, the idea</div>
+        <h2>What is RAG?</h2>
+      </div>
+      <div class="rag-definition">
+        <div>
+          <p class="definition">
+            <strong>Retrieval-Augmented Generation (RAG)</strong> is a way to give a language model
+            relevant information at question time. Instead of relying only on what the model learned
+            during training, the system first searches a document collection and then gives the best
+            matching passages to the model as context.
+          </p>
+          <p class="muted">
+            In practical terms: search first, answer second. That makes it possible to use private or
+            frequently changing information without retraining the model.
+          </p>
+        </div>
+        <div class="plain-box">
+          <h3>Simple example</h3>
+          <p class="muted small">A user asks:</p>
+          <p><strong>“Which metrics should I use to evaluate retrieval quality?”</strong></p>
+          <p class="muted small">
+            The system searches the local corpus, retrieves passages about Recall@K, MRR and nDCG,
+            reranks them, and asks the local model to answer only from that evidence.
+          </p>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-top:34px">
+        <div class="kicker">This implementation</div>
+        <h2>What this project adds around a basic RAG pipeline</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Hybrid retrieval</h3>
+          <p class="muted small">BM25 handles exact terms while dense embeddings capture semantic similarity. Their scores are fused before reranking.</p>
+        </div>
+        <div class="card">
+          <h3>Evidence checks</h3>
+          <p class="muted small">A CrossEncoder confidence gate can stop generation when retrieved evidence is too weak, rather than asking the model to guess.</p>
+        </div>
+        <div class="card">
+          <h3>Evaluation and traces</h3>
+          <p class="muted small">Each run records retrieval quality, groundedness, citations, abstention behavior, and latency so failures can be diagnosed.</p>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>Final benchmark</h2>
-    <p id="benchmarkNote" class="muted">Looking for final workstation benchmark artifacts...</p>
-    <div id="summaryMetrics" class="metrics-grid"></div>
-    <div id="pipelineSummary"></div>
-  </div>
-
-  <div class="card">
-    <h2>Reliability progression</h2>
-    <p class="muted">Measured regression history from the same small portfolio evaluation set. The purpose is to show failure analysis and iterative improvement, not to claim production-wide accuracy.</p>
-    <div id="reliabilityHistory"><span class="muted">Loading reliability history...</span></div>
-  </div>
-
-  <div class="card">
-    <h2>RAG query</h2>
-    <p id="queryHelp" class="muted"></p>
-    <div id="pagesSelectorWrap" style="display:none">
-      <label for="recordedQuery">Recorded benchmark query</label>
-      <select id="recordedQuery"></select>
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Request path</div>
+        <h2>What happens when a question is submitted</h2>
+        <p class="muted">The stages below are executed locally when the FastAPI backend is running.</p>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="step-num">1</div><h3>Search</h3><p class="muted small">BM25 and dense vector retrieval each find candidate passages.</p></div>
+        <div class="step"><div class="step-num">2</div><h3>Fuse</h3><p class="muted small">Lexical and semantic retrieval scores are normalized and combined.</p></div>
+        <div class="step"><div class="step-num">3</div><h3>Rerank</h3><p class="muted small">A CrossEncoder scores query–passage pairs more precisely.</p></div>
+        <div class="step"><div class="step-num">4</div><h3>Check evidence</h3><p class="muted small">Weak retrieval can trigger an abstention before generation.</p></div>
+        <div class="step"><div class="step-num">5</div><h3>Generate</h3><p class="muted small">Qwen answers from the retrieved context using local inference.</p></div>
+        <div class="step"><div class="step-num">6</div><h3>Verify & log</h3><p class="muted small">Citations, groundedness, latency and sources are evaluated and stored.</p></div>
+      </div>
     </div>
-    <div id="localQueryWrap">
-      <textarea id="question" rows="3">What is retrieval augmented generation?</textarea>
-      <label for="topK">Top K</label>
-      <input id="topK" type="number" min="1" max="8" value="3" />
-    </div>
-    <button id="askBtn">Run query</button>
-    <p id="status" class="muted"></p>
-    <div id="result" class="answer-box"><span class="muted">No query selected yet.</span></div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>Evaluation traces</h2>
-    <p id="traceHelp" class="muted"></p>
-    <button id="tracesBtn">Load traces</button>
-    <div id="traces" class="answer-box"><span class="muted">No traces loaded.</span></div>
+  <section id="stack">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Implementation</div>
+        <h2>Technology stack</h2>
+        <p class="muted">Each component has one specific job in the pipeline.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card stack-card"><h3>BM25</h3><p class="role">Keyword-based retrieval for exact terms, names and identifiers.</p><code>rank-bm25</code></div>
+        <div class="card stack-card"><h3>SentenceTransformers</h3><p class="role">Creates dense semantic embeddings for documents and queries.</p><code>all-MiniLM-L6-v2</code></div>
+        <div class="card stack-card"><h3>FAISS</h3><p class="role">Performs fast similarity search over normalized embedding vectors.</p><code>faiss-cpu</code></div>
+        <div class="card stack-card"><h3>CrossEncoder</h3><p class="role">Reranks short candidate lists using joint query–document scoring.</p><code>ms-marco-MiniLM-L-6-v2</code></div>
+        <div class="card stack-card"><h3>Qwen</h3><p class="role">Runs the final answer generation locally without a paid model API.</p><code>Qwen2.5-1.5B-Instruct</code></div>
+        <div class="card stack-card"><h3>FastAPI</h3><p class="role">Exposes the local RAG pipeline through a small HTTP API.</p><code>POST /query</code></div>
+        <div class="card stack-card"><h3>SQLite</h3><p class="role">Stores local query traces, metrics, sources and timing information.</p><code>ragops.db</code></div>
+        <div class="card stack-card"><h3>GitHub Actions</h3><p class="role">Runs lightweight tests and deploys this static project page.</p><code>CI + Pages</code></div>
+      </div>
+      <div class="pill-row" style="margin-top:16px">
+        <span class="pill">Python</span><span class="pill">PyTorch</span><span class="pill">Transformers</span>
+        <span class="pill">NumPy</span><span class="pill">pytest</span><span class="pill">Docker</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Measured behavior</div>
+        <h2>Final evaluation snapshot</h2>
+        <p class="muted">
+          These results come from a small, purpose-built 12-query regression set:
+          10 answerable questions and 2 intentionally unanswerable questions.
+          They are useful for comparing project versions, not for claiming general production accuracy.
+        </p>
+      </div>
+      <div id="benchmarkNote" class="muted small" style="margin-bottom:12px">Loading benchmark…</div>
+      <div id="summaryMetrics" class="metric-grid"></div>
+
+      <div class="section-head" style="margin-top:34px">
+        <h2 style="font-size:1.35rem">Retrieval comparison</h2>
+        <p class="muted small">The same labeled retrieval queries are evaluated across four retrieval configurations.</p>
+      </div>
+      <div id="pipelineSummary"></div>
+
+      <div class="section-head" style="margin-top:34px">
+        <h2 style="font-size:1.35rem">Reliability progression</h2>
+        <p class="muted small">The failures found in earlier versions were kept visible and used as regression targets.</p>
+      </div>
+      <div id="reliabilityHistory"><span class="muted">Loading version history…</span></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Inspect a run</div>
+        <h2>Recorded benchmark examples</h2>
+        <p class="muted" id="queryHelp"></p>
+      </div>
+      <div class="demo-shell">
+        <div class="demo-head">
+          <div>
+            <strong id="demoModeTitle">Recorded run</strong>
+            <div class="muted small" id="modeDetail"></div>
+          </div>
+        </div>
+        <div class="demo-body">
+          <div id="pagesSelectorWrap" style="display:none">
+            <label for="recordedQuery">Question</label>
+            <select id="recordedQuery"></select>
+          </div>
+          <div id="localQueryWrap">
+            <label for="question">Question</label>
+            <textarea id="question">What is retrieval augmented generation?</textarea>
+            <label for="topK">Number of passages to pass to the model</label>
+            <input id="topK" type="number" min="1" max="8" value="3" />
+          </div>
+          <button class="button primary" id="askBtn">Run query</button>
+          <span id="status" class="muted small" style="margin-left:10px"></span>
+          <div id="result" class="answer-box"><span class="muted">Choose a question to inspect a recorded run.</span></div>
+        </div>
+      </div>
+
+      <details style="margin-top:16px">
+        <summary>What do “groundedness,” “citation validity,” and “citation coverage” mean?</summary>
+        <p><strong>Groundedness</strong> estimates whether answer sentences are semantically supported by retrieved passages. <strong>Citation validity</strong> checks whether cited source IDs actually belong to the retrieved set. <strong>Citation coverage</strong> measures how many factual answer sentences include a source citation.</p>
+      </details>
+      <details>
+        <summary>Why does the system sometimes refuse to answer?</summary>
+        <p>If the strongest reranked passage falls below a calibrated confidence threshold, generation is skipped and the system returns an insufficient-evidence response. This is intended to reduce unsupported answers when retrieval is weak.</p>
+      </details>
+      <details>
+        <summary>Why is this public page read-only?</summary>
+        <p>GitHub Pages serves static files only. The full FastAPI, FAISS, CrossEncoder and Qwen pipeline runs locally on the workstation. This page publishes recorded benchmark artifacts so the project can be inspected without keeping a GPU machine online.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="traces">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Observability</div>
+        <h2>Query-level traces</h2>
+        <p class="muted" id="traceHelp"></p>
+      </div>
+      <button class="button" id="tracesBtn">Load benchmark traces</button>
+      <div id="tracesBox" class="answer-box"><span class="muted">Traces are loaded on demand.</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    RAGOps is a local-first engineering project focused on retrieval quality, grounded generation, citations, abstention, and observability.
   </div>
+</footer>
 
 <script>
-const local = ["127.0.0.1","localhost"].includes(window.location.hostname);
-const modeText=document.getElementById("modeText"),modeDetail=document.getElementById("modeDetail");
-const askBtn=document.getElementById("askBtn"),tracesBtn=document.getElementById("tracesBtn");
-const status=document.getElementById("status"),result=document.getElementById("result"),traces=document.getElementById("traces");
-const pct=v=>v==null?"—":Math.round(v*100)+"%";
+const local=["127.0.0.1","localhost"].includes(window.location.hostname);
+const askBtn=document.getElementById("askBtn");
+const tracesBtn=document.getElementById("tracesBtn");
+const status=document.getElementById("status");
+const result=document.getElementById("result");
+const tracesBox=document.getElementById("tracesBox");
+const pct=v=>v==null?"—":(v*100).toFixed(v*100%1===0?0:1)+"%";
 let finalRuns=[];
 
 if(local){
-  modeText.innerHTML='<span class="ok">Local API mode:</span> live FastAPI + local Qwen inference is enabled.';
-  modeDetail.innerHTML='Swagger docs: <code>/docs</code>.';
-  document.getElementById("queryHelp").textContent="Runs the full local retrieval + reranking + generation pipeline.";
-  document.getElementById("traceHelp").textContent="Loads recent SQLite-backed local traces.";
-  askBtn.textContent="Ask local RAG"; tracesBtn.textContent="Load local traces";
+  document.getElementById("modeText").innerHTML="<strong>Local mode:</strong> the full FastAPI + retrieval + Qwen pipeline is available on this machine.";
+  document.getElementById("modeDetail").innerHTML='Live inference is enabled. API documentation is available at <code>/docs</code>.';
+  document.getElementById("demoModeTitle").textContent="Live local query";
+  document.getElementById("queryHelp").textContent="Submit a question to the local pipeline and inspect its answer, retrieved passages, citations and timing.";
+  document.getElementById("traceHelp").textContent="Loads recent SQLite-backed traces from the local API.";
+  tracesBtn.textContent="Load local traces";
 }else{
-  modeText.innerHTML='<span class="warn">GitHub Pages mode:</span> showing committed workstation benchmark artifacts.';
-  modeDetail.textContent="The public site does not host Qwen; recorded benchmark outputs are displayed here.";
-  document.getElementById("queryHelp").textContent="Choose a real workstation benchmark query and inspect its recorded answer, citations, sources, and latency.";
-  document.getElementById("traceHelp").textContent="Loads the final benchmark query-level runs when available.";
+  document.getElementById("modeText").innerHTML="<strong>Public demo:</strong> this page shows benchmark results recorded on the workstation. The model itself is not hosted on GitHub Pages.";
+  document.getElementById("modeDetail").textContent="Recorded final-v3 benchmark output";
+  document.getElementById("demoModeTitle").textContent="Recorded workstation run";
+  document.getElementById("queryHelp").textContent="Choose a benchmark question below. The answer, sources and metrics were produced by the complete local pipeline and saved with the repository.";
+  document.getElementById("traceHelp").textContent="Loads all final-v3 benchmark runs so individual successes and failures can be inspected.";
   document.getElementById("localQueryWrap").style.display="none";
   document.getElementById("pagesSelectorWrap").style.display="block";
-  askBtn.textContent="Show benchmark run"; tracesBtn.textContent="Load benchmark traces";
+  askBtn.textContent="Show recorded run";
 }
 
 function renderQuery(data,demo=false){
   const m=data.metrics||{},lat=data.latency_ms||{},sources=data.sources||[];
+  const confidence=m.retrieval_confidence||{};
   result.innerHTML=`
-    <h3>Answer</h3><p>${data.answer||"No answer returned."}</p>
-    <div class="metrics-grid">
-      <div class="metric"><div class="muted">Status</div><div class="value">${data.answer_status||"answered"}</div></div>
-      <div class="metric"><div class="muted">Groundedness</div><div class="value">${pct(m.groundedness_score)}</div></div>
-      <div class="metric"><div class="muted">Citation validity</div><div class="value">${m.citation_validity==null?"N/A":pct(m.citation_validity)}</div></div>
-      <div class="metric"><div class="muted">Citation coverage</div><div class="value">${m.citation_coverage==null?"N/A":pct(m.citation_coverage)}</div></div>
-      <div class="metric"><div class="muted">Total latency</div><div class="value">${lat.total??"—"} ms</div></div>
+    <h3>Answer</h3>
+    <p>${data.answer||"No answer returned."}</p>
+    <div class="metric-grid" style="margin-top:18px">
+      <div class="metric"><div class="metric-label">Status</div><div class="metric-value" style="font-size:1.1rem">${data.answer_status||"answered"}</div></div>
+      <div class="metric"><div class="metric-label">Groundedness</div><div class="metric-value">${pct(m.groundedness_score)}</div></div>
+      <div class="metric"><div class="metric-label">Citation validity</div><div class="metric-value">${m.citation_validity==null?"N/A":pct(m.citation_validity)}</div></div>
+      <div class="metric"><div class="metric-label">Citation coverage</div><div class="metric-value">${m.citation_coverage==null?"N/A":pct(m.citation_coverage)}</div></div>
     </div>
-    <h3>Retrieved sources</h3>
-    <div>${sources.map((s,i)=>`<div class="source"><strong>${i+1}. ${s.title||s.id}</strong><div class="muted small">score ${s.score??"—"}${s.rerank_score!=null?" · rerank "+s.rerank_score:""}</div></div>`).join("")||'<span class="muted">No sources.</span>'}</div>
-    ${demo?'<p class="muted small">Recorded workstation benchmark result; no live inference is running on GitHub Pages.</p>':""}
+    <p class="muted small" style="margin-top:12px">
+      Total latency: ${lat.total??"—"} ms
+      ${confidence.top_rerank_score!=null?" · top reranker score: "+confidence.top_rerank_score:""}
+      ${confidence.gate?" · confidence gate: "+confidence.gate:""}
+    </p>
+    <h3>Retrieved passages</h3>
+    <div>${sources.map((s,i)=>`
+      <div class="source">
+        <strong>${i+1}. ${s.title||s.id}</strong>
+        <div class="muted small">hybrid score ${s.score??"—"}${s.rerank_score!=null?" · CrossEncoder "+s.rerank_score:""}</div>
+      </div>`).join("")||'<span class="muted">No source details available.</span>'}</div>
+    ${demo?'<p class="muted small" style="margin-top:12px">This is a stored benchmark result; no model is running in the browser.</p>':""}
   `;
 }
 
 async function loadBenchmark(){
   try{
-    const r=await fetch("./data/final_benchmark_summary.json?v="+Date.now(), {cache:"no-store"});
+    const r=await fetch("./data/final_benchmark_summary.json?v="+Date.now(),{cache:"no-store"});
     if(!r.ok) throw new Error();
     const d=await r.json(),e=d.end_to_end||{};
-    document.getElementById("benchmarkNote").innerHTML='<span class="ok">Final workstation benchmark loaded.</span> Generated '+new Date(d.generated_at).toLocaleString()+'.';
+    document.getElementById("benchmarkNote").textContent=
+      (d.benchmark_version||"Final benchmark")+" · generated "+new Date(d.generated_at).toLocaleString();
     document.getElementById("summaryMetrics").innerHTML=`
-      <div class="metric"><div class="muted">Queries</div><div class="value">${e.queries_evaluated??"—"}</div></div>
-      <div class="metric"><div class="muted">Behavior accuracy</div><div class="value">${pct(e.behavior_accuracy)}</div></div>
-      <div class="metric"><div class="muted">Groundedness</div><div class="value">${pct(e.avg_groundedness)}</div></div>
-      <div class="metric"><div class="muted">Citation validity</div><div class="value">${pct(e.avg_citation_validity)}</div></div>
-      <div class="metric"><div class="muted">Citation coverage</div><div class="value">${pct(e.avg_citation_coverage)}</div></div>
-      <div class="metric"><div class="muted">Abstention accuracy</div><div class="value">${pct(e.abstention_accuracy)}</div></div>
-      <div class="metric"><div class="muted">Avg total latency</div><div class="value">${e.avg_total_ms??"—"} ms</div></div>`;
-    document.getElementById("pipelineSummary").innerHTML='<h3>Retrieval comparison</h3>'+ (d.retrieval_pipelines||[]).map(p=>
-      `<div class="source"><strong>${p.name}</strong><div class="muted small">Recall@5 ${pct(p.recall_at_k)} · Precision@5 ${pct(p.precision_at_k)} · MRR ${pct(p.mrr)} · nDCG@5 ${pct(p.ndcg_at_k)} · ${p.avg_latency_ms} ms</div></div>`
-    ).join("");
+      <div class="metric"><div class="metric-label">Behavior accuracy</div><div class="metric-value">${pct(e.behavior_accuracy)}</div><div class="metric-note">Expected answer vs. abstention behavior</div></div>
+      <div class="metric"><div class="metric-label">Groundedness</div><div class="metric-value">${pct(e.avg_groundedness)}</div><div class="metric-note">Sentence support from retrieved context</div></div>
+      <div class="metric"><div class="metric-label">Citation validity</div><div class="metric-value">${pct(e.avg_citation_validity)}</div><div class="metric-note">Citations point to retrieved sources</div></div>
+      <div class="metric"><div class="metric-label">Citation coverage</div><div class="metric-value">${pct(e.avg_citation_coverage)}</div><div class="metric-note">Factual sentences carrying citations</div></div>
+      <div class="metric"><div class="metric-label">Abstention accuracy</div><div class="metric-value">${pct(e.abstention_accuracy)}</div><div class="metric-note">Unanswerable questions refused correctly</div></div>
+      <div class="metric"><div class="metric-label">Average latency</div><div class="metric-value">${((e.avg_total_ms||0)/1000).toFixed(1)}s</div><div class="metric-note">End-to-end workstation runtime</div></div>
+      <div class="metric"><div class="metric-label">Questions</div><div class="metric-value">${e.queries_evaluated??"—"}</div><div class="metric-note">10 answerable + 2 unanswerable</div></div>
+      <div class="metric"><div class="metric-label">Gate abstentions</div><div class="metric-value">${e.confidence_gated_abstentions??"—"}</div><div class="metric-note">Generation skipped due to weak evidence</div></div>
+    `;
+    const ps=d.retrieval_pipelines||[];
+    document.getElementById("pipelineSummary").innerHTML=`
+      <div class="table-wrap"><table>
+      <thead><tr><th>Pipeline</th><th>Recall@5</th><th>Precision@5</th><th>MRR</th><th>nDCG@5</th><th>Avg. latency</th></tr></thead>
+      <tbody>${ps.map(p=>`<tr><td><strong>${p.name}</strong></td><td>${pct(p.recall_at_k)}</td><td>${pct(p.precision_at_k)}</td><td>${pct(p.mrr)}</td><td>${pct(p.ndcg_at_k)}</td><td>${p.avg_latency_ms} ms</td></tr>`).join("")}</tbody>
+      </table></div>`;
   }catch(e){
-    document.getElementById("benchmarkNote").innerHTML='<span class="warn">Final workstation benchmark not committed yet.</span> Run <code>python scripts/run_final_benchmark.py</code> on the workstation, then commit the generated JSON files.';
-    const r=await fetch("./data/evaluation_summary.json?v="+Date.now(), {cache:"no-store"});
-    if(r.ok){
-      const d=await r.json(),m=d.summary_metrics||{};
-      document.getElementById("summaryMetrics").innerHTML=`
-        <div class="metric"><div class="muted">Legacy demo queries</div><div class="value">${m.queries_evaluated??"—"}</div></div>
-        <div class="metric"><div class="muted">Legacy Recall@5</div><div class="value">${pct(m.avg_recall_at_5)}</div></div>`;
-    }
+    document.getElementById("benchmarkNote").textContent="Benchmark summary is unavailable.";
+  }
+}
+
+async function loadReliabilityHistory(){
+  try{
+    const r=await fetch("./data/reliability_history.json?v="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error();
+    const d=await r.json();
+    document.getElementById("reliabilityHistory").innerHTML=`
+      <div class="table-wrap"><table>
+        <thead><tr><th>Version</th><th>Behavior</th><th>Groundedness</th><th>Citation validity</th><th>Citation coverage</th><th>Abstention</th><th>Latency</th></tr></thead>
+        <tbody>${(d.versions||[]).map(v=>`
+          <tr>
+            <td><strong>${v.version}</strong></td>
+            <td>${pct(v.behavior_accuracy)}</td>
+            <td>${pct(v.groundedness)}</td>
+            <td>${v.citation_validity==null?"N/A":pct(v.citation_validity)}</td>
+            <td>${pct(v.citation_coverage)}</td>
+            <td>${pct(v.abstention_accuracy)}</td>
+            <td>${(v.avg_total_ms/1000).toFixed(1)} s</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>
+      <p class="muted small" style="margin-top:10px">${d.benchmark_scope||""}</p>`;
+  }catch(e){
+    document.getElementById("reliabilityHistory").innerHTML='<span class="muted">Version history unavailable.</span>';
   }
 }
 
 async function loadFinalRuns(){
   if(local) return;
   try{
-    const r=await fetch("./data/final_benchmark_runs.json?v="+Date.now(), {cache:"no-store"});
+    const r=await fetch("./data/final_benchmark_runs.json?v="+Date.now(),{cache:"no-store"});
     if(!r.ok) throw new Error();
     finalRuns=await r.json();
     const select=document.getElementById("recordedQuery");
@@ -162,7 +498,7 @@ async function loadFinalRuns(){
     const firstAnswered=finalRuns.findIndex(x=>x.answer_status==="answered");
     if(firstAnswered>=0) select.value=String(firstAnswered);
   }catch(e){
-    document.getElementById("recordedQuery").innerHTML='<option>Final benchmark not available yet</option>';
+    document.getElementById("recordedQuery").innerHTML="<option>Benchmark runs unavailable</option>";
     askBtn.disabled=true;
   }
 }
@@ -171,64 +507,54 @@ askBtn.addEventListener("click",async()=>{
   askBtn.disabled=true;
   try{
     if(!local){
-      const i=Number(document.getElementById("recordedQuery").value);
-      const run=finalRuns[i];
+      const run=finalRuns[Number(document.getElementById("recordedQuery").value)];
       if(!run) throw new Error("No benchmark run available.");
-      renderQuery(run,true); status.textContent="Recorded benchmark run loaded."; return;
+      renderQuery(run,true);
+      status.textContent="Recorded run loaded.";
+      return;
     }
-    status.textContent="Running retrieval + generation...";
-    const query=document.getElementById("question").value.trim(),top_k=Number(document.getElementById("topK").value||3);
+    status.textContent="Running retrieval and generation…";
+    const query=document.getElementById("question").value.trim();
+    const top_k=Number(document.getElementById("topK").value||3);
     const r=await fetch("/query",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query,top_k})});
-    const d=await r.json(); if(!r.ok) throw new Error(d.detail||"request failed");
-    renderQuery(d,false); status.textContent=`Live query complete in ${d?.latency_ms?.total??"?"} ms.`;
-  }catch(e){result.innerHTML='<span class="warn">'+String(e)+'</span>';status.textContent="Request failed."}
-  finally{askBtn.disabled=false}
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.detail||"request failed");
+    renderQuery(d,false);
+    status.textContent="Query complete.";
+  }catch(e){
+    result.innerHTML='<span class="warn">'+String(e)+'</span>';
+    status.textContent="Request failed.";
+  }finally{
+    askBtn.disabled=false;
+  }
 });
 
 tracesBtn.addEventListener("click",async()=>{
-  tracesBtn.disabled=true; traces.innerHTML='<span class="muted">Loading...</span>';
+  tracesBtn.disabled=true;
+  tracesBox.innerHTML='<span class="muted">Loading…</span>';
   try{
     const endpoint=local?"/traces?limit=20":"./data/final_benchmark_runs.json?v="+Date.now();
-    const r=await fetch(endpoint); if(!r.ok) throw new Error("trace data unavailable");
-    const p=await r.json(),items=Array.isArray(p)?p:(p.traces||p.items||[]);
-    traces.innerHTML=items.map((t,i)=>{
+    const r=await fetch(endpoint);
+    if(!r.ok) throw new Error("trace data unavailable");
+    const payload=await r.json();
+    const items=Array.isArray(payload)?payload:(payload.traces||payload.items||[]);
+    tracesBox.innerHTML=items.map((t,i)=>{
       const m=t.metrics||{};
-      return `<div class="trace"><strong>${i+1}. ${t.query||"Query"}</strong>
-      <div class="muted small">Status: ${t.answer_status||"—"} · Groundedness: ${pct(m.groundedness_score??m.groundedness)} · Citation validity: ${m.citation_validity==null?"N/A":pct(m.citation_validity)} · Latency: ${t?.latency_ms?.total??m.latency_ms??"—"} ms</div>
-      <div class="small">${t.answer||""}</div></div>`;
+      return `<div class="trace">
+        <strong>${i+1}. ${t.query||"Query"}</strong>
+        <div class="muted small">Status: ${t.answer_status||"—"} · Groundedness: ${pct(m.groundedness_score??m.groundedness)} · Citation validity: ${m.citation_validity==null?"N/A":pct(m.citation_validity)} · Latency: ${t?.latency_ms?.total??m.latency_ms??"—"} ms</div>
+        <div class="trace-answer small">${t.answer||""}</div>
+      </div>`;
     }).join("")||'<span class="muted">No traces found.</span>';
-  }catch(e){traces.innerHTML='<span class="warn">'+String(e)+'</span>'}
-  finally{tracesBtn.disabled=false}
+  }catch(e){
+    tracesBox.innerHTML='<span class="warn">'+String(e)+'</span>';
+  }finally{
+    tracesBtn.disabled=false;
+  }
 });
 
-async function loadReliabilityHistory(){
-  try{
-    const r=await fetch("./data/reliability_history.json?v="+Date.now(), {cache:"no-store"});
-    if(!r.ok) throw new Error();
-    const d=await r.json();
-    const rows=(d.versions||[]).map(v=>`
-      <tr>
-        <td><strong>${v.version}</strong></td>
-        <td>${pct(v.behavior_accuracy)}</td>
-        <td>${pct(v.groundedness)}</td>
-        <td>${v.citation_validity==null?"N/A":pct(v.citation_validity)}</td>
-        <td>${pct(v.citation_coverage)}</td>
-        <td>${pct(v.abstention_accuracy)}</td>
-        <td>${(v.avg_total_ms/1000).toFixed(1)} s</td>
-      </tr>`).join("");
-    document.getElementById("reliabilityHistory").innerHTML=`
-      <table class="history-table">
-        <thead><tr><th>Version</th><th>Behavior</th><th>Groundedness</th><th>Citation validity</th><th>Citation coverage</th><th>Abstention</th><th>Latency</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <p class="small muted">${d.benchmark_scope||""}</p>`;
-  }catch(e){
-    document.getElementById("reliabilityHistory").innerHTML='<span class="muted">Reliability history unavailable.</span>';
-  }
-}
-
-loadReliabilityHistory();
 loadBenchmark();
+loadReliabilityHistory();
 loadFinalRuns();
 </script>
 </body>
