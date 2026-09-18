@@ -1,50 +1,22 @@
 [
-  {
-    "id": "doc_rag_eval_001",
-    "title": "RAG Evaluation Playbook",
-    "category": "Evaluation",
-    "text": "A production RAG system should evaluate retrieval and answer generation separately. Retrieval evaluation measures whether relevant chunks are found and ranked highly. Answer evaluation measures whether generated claims are supported by the retrieved evidence. Useful checks include Recall@K, Precision@K, MRR, nDCG, groundedness, citation coverage, and hallucination risk. Unsupported claims should be flagged when generated assertions cannot be mapped to evidence passages."
-  },
-  {
-    "id": "doc_rag_eval_002",
-    "title": "Retrieval Strategy Comparison",
-    "category": "Retrieval",
-    "text": "BM25 keyword search is fast and inexpensive but depends on lexical overlap between the query and documents. Dense embedding retrieval can find semantically similar content even when the wording differs. Hybrid retrieval combines keyword and dense retrieval to improve candidate coverage. A reranker can reorder candidate passages so that the most answer-relevant evidence appears near the top of the context window."
-  },
-  {
-    "id": "doc_rag_eval_003",
-    "title": "Grounding and Citation Coverage",
-    "category": "Reliability",
-    "text": "Grounding describes whether an answer is supported by retrieved evidence. Citation coverage estimates whether important statements in the answer are backed by source passages. A response can sound plausible but still be risky if it includes claims that are not present in the retrieved context. Grounding analysis is useful for reducing hallucination risk in RAG systems."
-  },
-  {
-    "id": "doc_rag_eval_004",
-    "title": "Operational Metrics for RAG",
-    "category": "Operations",
-    "text": "RAG systems should track operational metrics such as retrieval latency, reranking latency, generation latency, prompt tokens, completion tokens, total request time, and estimated cost per query. Higher retrieval quality can increase latency and cost, especially when reranking or larger context windows are used. Production teams need to balance quality, latency, and cost."
-  },
-  {
-    "id": "doc_rag_eval_005",
-    "title": "Trace-Level Debugging",
-    "category": "Observability",
-    "text": "Aggregate metrics are not enough to debug RAG systems. Engineers need trace-level inspection that shows the user query, retrieved chunks, ranking scores, generated answer, evaluation scores, and failure tags. Trace inspection helps determine whether a failure came from missed context, partial context, weak ranking, unsupported claims, or citation gaps."
-  },
-  {
-    "id": "doc_rag_eval_006",
-    "title": "Prompt and Retriever Regression Testing",
-    "category": "LLMOps",
-    "text": "Prompt changes, embedding model changes, chunking changes, and retriever configuration changes can introduce regressions. A stable evaluation set should be used to compare pipeline versions. Regression tests should track answer quality, retrieval quality, latency, token usage, cost, and failure categories across releases."
-  },
-  {
-    "id": "doc_support_001",
-    "title": "Technical Support Search Failure Cases",
-    "category": "Search",
-    "text": "Keyword-only search may fail in support assistants when users describe issues with different vocabulary, abbreviations, or partial symptoms. Semantic retrieval can improve recall by matching meaning instead of exact wording. Hybrid retrieval is often used when both exact terms and semantic similarity matter."
-  },
-  {
-    "id": "doc_ops_001",
-    "title": "AI System Cost Monitoring",
-    "category": "Operations",
-    "text": "Cost monitoring for LLM applications requires tracking prompt tokens, completion tokens, model choice, retrieval overhead, and request volume. Cost per thousand queries is a useful normalized measure for comparing pipeline variants. A system with stronger answer quality may still be unsuitable if latency or cost exceeds product constraints."
-  }
+  {"id":"doc_01","title":"What Is Retrieval-Augmented Generation?","category":"rag","text":"Retrieval-Augmented Generation, or RAG, is an architecture that retrieves relevant information from an external knowledge source and supplies that evidence to a language model as context before the model generates an answer. RAG can improve factual grounding, make private or frequently changing knowledge available to the model, and provide sources that can be cited without retraining the language model."},
+  {"id":"doc_02","title":"Core RAG Pipeline","category":"rag","text":"A typical RAG pipeline has several stages: ingest documents, split or chunk them, create searchable representations, retrieve candidates for a user query, optionally rerank the candidates, construct a prompt containing the best evidence, generate an answer with an LLM, and evaluate or trace the result. Retrieval and generation should be measured separately because either stage can fail independently."},
+  {"id":"doc_03","title":"Evaluating Retrieval Quality","category":"evaluation","text":"Retrieval quality in RAG systems is commonly measured with ranking metrics such as Recall at K, Precision at K, Mean Reciprocal Rank, and nDCG. Recall at K measures whether relevant evidence was found in the top K results, Precision at K measures how much of the returned set is relevant, MRR emphasizes the rank position of the first relevant result, and nDCG rewards relevant documents appearing near the top."},
+  {"id":"doc_04","title":"BM25 Lexical Retrieval","category":"retrieval","text":"BM25 is a lexical ranking method based on term frequency, document frequency, and document length normalization. It is strong when exact words, product names, identifiers, acronyms, or rare terms in the query also occur in relevant documents. Lexical retrieval does not require neural embeddings."},
+  {"id":"doc_05","title":"Dense Semantic Retrieval","category":"retrieval","text":"Dense retrieval encodes queries and documents as numeric vectors using an embedding model. Similarity search can retrieve semantically related text even when the query and document use different vocabulary. Dense retrieval is useful for paraphrases and conceptual similarity but may miss exact identifiers that lexical retrieval handles well."},
+  {"id":"doc_06","title":"Hybrid Retrieval","category":"retrieval","text":"Hybrid retrieval combines lexical methods such as BM25 with dense vector similarity. Lexical retrieval is strong for exact terms and identifiers, while dense retrieval captures semantic similarity. A common design normalizes both score types and fuses them with configurable weights before optional reranking."},
+  {"id":"doc_07","title":"FAISS Vector Search","category":"retrieval","text":"FAISS is an open-source library for efficient similarity search over dense vectors. For normalized embeddings, inner-product search can be used to rank vectors similarly to cosine similarity. A FAISS index can be built once for a stable corpus and rebuilt when the corpus or embedding model changes."},
+  {"id":"doc_08","title":"SentenceTransformers Embeddings","category":"retrieval","text":"SentenceTransformers provides pretrained embedding models that convert sentences and passages into dense vectors. In a RAG system, the same embedding model should normally encode both corpus passages and incoming queries so they can be compared in the same vector space."},
+  {"id":"doc_09","title":"CrossEncoder Reranking","category":"retrieval","text":"A CrossEncoder jointly scores a query and candidate document pair and is commonly used as a second-stage reranker. Because it evaluates each pair together, it can be more accurate than bi-encoder similarity but is more computationally expensive. It is therefore usually applied only to a short candidate list produced by BM25, dense search, or hybrid retrieval."},
+  {"id":"doc_10","title":"Document Chunking","category":"ingestion","text":"RAG systems often split long documents into smaller chunks before embedding. Chunks should be large enough to preserve useful context but small enough to retrieve specific evidence. Chunk size, overlap, headings, and metadata can all affect retrieval quality, and the best configuration should be evaluated rather than assumed."},
+  {"id":"doc_11","title":"Grounded Generation","category":"generation","text":"Grounded generation constrains an LLM to answer from retrieved evidence rather than relying freely on unsupported model knowledge. A robust prompt should require citations, forbid unsupported claims, and instruct the model to state when the retrieved evidence is insufficient."},
+  {"id":"doc_12","title":"Local LLM Serving","category":"generation","text":"A local instruction-tuned language model can generate RAG answers without paid APIs. Model weights are downloaded once and cached locally. When the application starts, the model is loaded into CPU or GPU memory; when the application stops, the model no longer consumes runtime memory."},
+  {"id":"doc_13","title":"Citation Validation","category":"evaluation","text":"Citation validation checks that source identifiers cited by an answer actually exist in the retrieved context. Citation validity and citation coverage are different metrics: validity measures whether citations point to allowed sources, while coverage measures whether factual answer claims are accompanied by citations."},
+  {"id":"doc_14","title":"Groundedness Evaluation","category":"evaluation","text":"Groundedness evaluation estimates whether claims in a generated answer are supported by retrieved evidence. Methods range from lexical overlap and embedding similarity to natural-language-inference models and LLM judges. Heuristic scores should be labeled clearly because they are not equivalent to human verification."},
+  {"id":"doc_15","title":"Abstention and Insufficient Evidence","category":"evaluation","text":"A reliable RAG assistant should abstain when retrieved evidence is insufficient. An abstention is different from a hallucination: a statement that the system lacks enough evidence should not be penalized as an unsupported factual answer if the system is correctly refusing to invent information."},
+  {"id":"doc_16","title":"RAG Observability","category":"observability","text":"RAG observability records the query, retrieved documents, retrieval and reranker scores, generated answer, citations, latency, model version, and evaluation signals for each request. Query-level traces help diagnose failures that aggregate metrics can hide."},
+  {"id":"doc_17","title":"Latency in RAG Systems","category":"observability","text":"End-to-end RAG latency can be decomposed into retrieval, reranking, prompt construction, and generation time. Local language-model generation is often the dominant cost, while vector retrieval over a small corpus may take only milliseconds. Recording stage-level latency makes bottlenecks visible."},
+  {"id":"doc_18","title":"SQLite for Local RAG Tracing","category":"observability","text":"SQLite is a lightweight embedded database that requires no separate server. A local RAG application can store query traces, answers, retrieved sources, metrics, and latency in a SQLite file and later export those records for dashboards or analysis."},
+  {"id":"doc_19","title":"RAG Failure Modes","category":"evaluation","text":"Common RAG failure modes include retrieval misses, poor ranking, incomplete context, contradictory sources, fabricated citations, unsupported answer claims, excessive latency, and answering when the evidence is insufficient. Evaluation should identify which stage caused a failure rather than treating all bad answers as generation errors."},
+  {"id":"doc_20","title":"Why Evaluate Answerable and Unanswerable Queries","category":"evaluation","text":"A useful RAG evaluation set should contain both answerable and intentionally unanswerable questions. Answerable questions test whether retrieval and generation can use available evidence. Unanswerable questions test whether the system can recognize missing evidence and abstain instead of hallucinating."}
 ]

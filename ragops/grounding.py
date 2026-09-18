@@ -1,0 +1,108 @@
+from __future__ import annotations
+
+import re
+
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+ABSTENTION_PATTERNS = (
+    "available evidence is insufficient",
+    "provided context is insufficient",
+    "context is insufficient",
+    "not enough evidence",
+    "insufficient evidence",
+    "cannot be answered based on the provided context",
+    "cannot answer based on the provided context",
+    "retrieved documents do not support",
+    "retrieved context does not support",
+)
+
+
+def _sentences(text: str) -> list[str]:
+    return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if len(s.strip()) > 3]
+
+
+def is_abstention(text: str) -> bool:
+    lowered = text.lower()
+    return any(pattern in lowered for pattern in ABSTENTION_PATTERNS)
+
+
+def _is_abstention_sentence(sentence: str) -> bool:
+    lowered = sentence.lower()
+    return any(pattern in lowered for pattern in ABSTENTION_PATTERNS)
+
+
+class GroundingEvaluator:
+    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2", device: str | None = None) -> None:
+        self.model = SentenceTransformer(model_name, device=device)
+
+    def evaluate(
+        self,
+        answer: str,
+        contexts: list[dict],
+        supported_threshold: float = 0.65,
+        weak_threshold: float = 0.45,
+    ) -> dict:
+        sentences = _sentences(answer)
+        abstained = is_abstention(answer)
+        if not sentences:
+            return {
+                "answer_status": "insufficient_evidence" if abstained else "answered",
+                "abstained": abstained,
+                "groundedness_score": 0.0,
+                "supported_sentences": 0,
+                "weak_sentences": 0,
+                "unsupported_sentences": 0,
+                "abstention_sentences": 0,
+                "sentences": [],
+            }
+
+        context_texts = [c["text"] for c in contexts]
+        if not context_texts:
+            return {
+                "answer_status": "insufficient_evidence",
+                "abstained": True,
+                "groundedness_score": 1.0 if abstained else 0.0,
+                "supported_sentences": 0,
+                "weak_sentences": 0,
+                "unsupported_sentences": 0 if abstained else len(sentences),
+                "abstention_sentences": len(sentences) if abstained else 0,
+                "sentences": [
+                    {"sentence": s, "max_similarity": None, "support": "abstention" if abstained else "unsupported"}
+                    for s in sentences
+                ],
+            }
+
+        context_embeddings = self.model.encode(context_texts, convert_to_numpy=True, normalize_embeddings=True)
+        sentence_embeddings = self.model.encode(sentences, convert_to_numpy=True, normalize_embeddings=True)
+
+        rows = []
+        support_values: list[float] = []
+        for sentence, emb in zip(sentences, sentence_embeddings):
+            if _is_abstention_sentence(sentence):
+                rows.append({"sentence": sentence, "max_similarity": None, "support": "abstention"})
+                # Correct refusal/abstention language is not an unsupported factual claim.
+                support_values.append(1.0)
+                continue
+
+            sims = context_embeddings @ emb
+            best = float(np.max(sims)) if len(sims) else 0.0
+            if best >= supported_threshold:
+                label, value = "supported", 1.0
+            elif best >= weak_threshold:
+                label, value = "weak", 0.5
+            else:
+                label, value = "unsupported", 0.0
+            rows.append({"sentence": sentence, "max_similarity": round(best, 3), "support": label})
+            support_values.append(value)
+
+        return {
+            "answer_status": "insufficient_evidence" if abstained else "answered",
+            "abstained": abstained,
+            "groundedness_score": round(sum(support_values) / len(support_values), 3),
+            "supported_sentences": sum(r["support"] == "supported" for r in rows),
+            "weak_sentences": sum(r["support"] == "weak" for r in rows),
+            "unsupported_sentences": sum(r["support"] == "unsupported" for r in rows),
+            "abstention_sentences": sum(r["support"] == "abstention" for r in rows),
+            "sentences": rows,
+        }

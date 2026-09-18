@@ -1,123 +1,84 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Sequence
+import json
+from pathlib import Path
 
+import faiss
 import numpy as np
+from rank_bm25 import BM25Okapi
+from sentence_transformers import CrossEncoder, SentenceTransformer
 
 
-@dataclass
-class RetrievedDocument:
-    doc_id: str
-    title: str
-    text: str
-    score: float
+def _tokenize(text: str) -> list[str]:
+    return text.lower().split()
 
 
-def _doc_text(doc: dict) -> str:
-    return f"{doc.get('title', '')} {doc.get('category', '')} {doc.get('text', '')}".strip()
+def _minmax(values: np.ndarray) -> np.ndarray:
+    if len(values) == 0:
+        return values
+    lo, hi = float(values.min()), float(values.max())
+    if abs(hi - lo) < 1e-12:
+        return np.ones_like(values)
+    return (values - lo) / (hi - lo)
 
 
-class RAGRetriever:
-    """Real retrieval stack using BM25, SentenceTransformers, FAISS and CrossEncoder.
-
-    Heavy dependencies are imported lazily so the static dashboard can still be
-    generated in lightweight CI environments without downloading model weights.
-    """
-
+class HybridRetriever:
     def __init__(
         self,
-        corpus: Sequence[dict],
+        corpus_path: str | Path,
         embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
         reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        device: str | None = None,
     ) -> None:
-        self.corpus = list(corpus)
-        self.embedding_model_name = embedding_model
-        self.reranker_model_name = reranker_model
-        self._bm25 = None
-        self._embedder = None
-        self._reranker = None
-        self._index = None
-        self._doc_embeddings = None
+        self.corpus_path = Path(corpus_path)
+        self.documents = json.loads(self.corpus_path.read_text(encoding="utf-8"))
+        self.texts = [f"{d['title']}\n{d['category']}\n{d['text']}" for d in self.documents]
+        self.bm25 = BM25Okapi([_tokenize(t) for t in self.texts])
+        self.embedder = SentenceTransformer(embedding_model, device=device)
+        self.reranker = CrossEncoder(reranker_model, device=device)
+        self.embeddings = self.embedder.encode(
+            self.texts,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        ).astype("float32")
+        self.index = faiss.IndexFlatIP(self.embeddings.shape[1])
+        self.index.add(self.embeddings)
 
-    def _ensure_bm25(self) -> None:
-        if self._bm25 is not None:
-            return
-        from rank_bm25 import BM25Okapi
-        tokenized = [_doc_text(doc).lower().split() for doc in self.corpus]
-        self._bm25 = BM25Okapi(tokenized)
-
-    def _ensure_dense(self) -> None:
-        if self._index is not None:
-            return
-        import faiss
-        from sentence_transformers import SentenceTransformer
-
-        self._embedder = SentenceTransformer(self.embedding_model_name)
-        texts = [_doc_text(doc) for doc in self.corpus]
-        embeddings = self._embedder.encode(texts, normalize_embeddings=True, convert_to_numpy=True)
-        embeddings = np.asarray(embeddings, dtype="float32")
-        index = faiss.IndexFlatIP(embeddings.shape[1])
-        index.add(embeddings)
-        self._doc_embeddings = embeddings
-        self._index = index
-
-    def _ensure_reranker(self) -> None:
-        if self._reranker is None:
-            from sentence_transformers import CrossEncoder
-            self._reranker = CrossEncoder(self.reranker_model_name)
-
-    def bm25(self, query: str, k: int = 5) -> list[RetrievedDocument]:
-        self._ensure_bm25()
-        scores = self._bm25.get_scores(query.lower().split())
+    def bm25_search(self, query: str, k: int = 5) -> list[dict]:
+        scores = np.asarray(self.bm25.get_scores(_tokenize(query)), dtype=float)
         order = np.argsort(scores)[::-1][:k]
-        return [
-            RetrievedDocument(self.corpus[i]["id"], self.corpus[i]["title"], self.corpus[i]["text"], float(scores[i]))
-            for i in order
-        ]
+        return [self._row(int(i), float(scores[i]), "bm25") for i in order]
 
-    def dense(self, query: str, k: int = 5) -> list[RetrievedDocument]:
-        self._ensure_dense()
-        query_embedding = self._embedder.encode([query], normalize_embeddings=True, convert_to_numpy=True)
-        query_embedding = np.asarray(query_embedding, dtype="float32")
-        scores, indices = self._index.search(query_embedding, min(k, len(self.corpus)))
-        return [
-            RetrievedDocument(self.corpus[i]["id"], self.corpus[i]["title"], self.corpus[i]["text"], float(score))
-            for score, i in zip(scores[0], indices[0])
-            if i >= 0
-        ]
+    def dense_search(self, query: str, k: int = 5) -> list[dict]:
+        q = self.embedder.encode([query], convert_to_numpy=True, normalize_embeddings=True).astype("float32")
+        scores, indices = self.index.search(q, min(k, len(self.documents)))
+        return [self._row(int(i), float(s), "dense") for s, i in zip(scores[0], indices[0])]
 
-    def hybrid(self, query: str, k: int = 5, candidate_k: int = 10, alpha: float = 0.5) -> list[RetrievedDocument]:
-        lexical = self.bm25(query, min(candidate_k, len(self.corpus)))
-        dense = self.dense(query, min(candidate_k, len(self.corpus)))
+    def hybrid_search(self, query: str, k: int = 5, candidate_k: int = 8, alpha: float = 0.5) -> list[dict]:
+        bm25_scores = np.asarray(self.bm25.get_scores(_tokenize(query)), dtype=float)
+        q = self.embedder.encode([query], convert_to_numpy=True, normalize_embeddings=True).astype("float32")
+        dense_scores = (self.embeddings @ q[0]).astype(float)
+        fused = alpha * _minmax(bm25_scores) + (1 - alpha) * _minmax(dense_scores)
+        order = np.argsort(fused)[::-1][: min(candidate_k, len(self.documents))]
+        rows = [self._row(int(i), float(fused[i]), "hybrid") for i in order]
+        return rows[:k]
 
-        def normalize(items: list[RetrievedDocument]) -> dict[str, float]:
-            if not items:
-                return {}
-            values = [item.score for item in items]
-            lo, hi = min(values), max(values)
-            if hi == lo:
-                return {item.doc_id: 1.0 for item in items}
-            return {item.doc_id: (item.score - lo) / (hi - lo) for item in items}
+    def hybrid_rerank(self, query: str, k: int = 3, candidate_k: int = 8, alpha: float = 0.5) -> list[dict]:
+        candidates = self.hybrid_search(query, k=candidate_k, candidate_k=candidate_k, alpha=alpha)
+        pairs = [(query, f"{c['title']}\n{c['text']}") for c in candidates]
+        scores = self.reranker.predict(pairs)
+        for candidate, score in zip(candidates, scores):
+            candidate["rerank_score"] = float(score)
+        return sorted(candidates, key=lambda x: x["rerank_score"], reverse=True)[:k]
 
-        lex_scores = normalize(lexical)
-        dense_scores = normalize(dense)
-        by_id = {doc["id"]: doc for doc in self.corpus}
-        candidate_ids = set(lex_scores) | set(dense_scores)
-        scored = []
-        for doc_id in candidate_ids:
-            score = alpha * lex_scores.get(doc_id, 0.0) + (1.0 - alpha) * dense_scores.get(doc_id, 0.0)
-            doc = by_id[doc_id]
-            scored.append(RetrievedDocument(doc_id, doc["title"], doc["text"], score))
-        return sorted(scored, key=lambda item: item.score, reverse=True)[:k]
-
-    def hybrid_reranked(self, query: str, k: int = 5, candidate_k: int = 10) -> list[RetrievedDocument]:
-        candidates = self.hybrid(query, k=min(candidate_k, len(self.corpus)), candidate_k=candidate_k)
-        self._ensure_reranker()
-        pairs = [[query, f"{item.title} {item.text}"] for item in candidates]
-        scores = self._reranker.predict(pairs)
-        reranked = [
-            RetrievedDocument(item.doc_id, item.title, item.text, float(score))
-            for item, score in zip(candidates, scores)
-        ]
-        return sorted(reranked, key=lambda item: item.score, reverse=True)[:k]
+    def _row(self, idx: int, score: float, method: str) -> dict:
+        d = self.documents[idx]
+        return {
+            "id": d["id"],
+            "title": d["title"],
+            "category": d["category"],
+            "text": d["text"],
+            "score": score,
+            "method": method,
+        }

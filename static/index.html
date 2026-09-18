@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAGOps Evaluation Dashboard</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: Inter, system-ui, sans-serif; max-width: 1100px; margin: 0 auto; padding: 36px 20px 60px; background:#0b1020; color:#eef2ff; }
+    h1 { margin-bottom: 8px; } h2 { margin-top: 0; }
+    .muted { color:#aab3cc; } .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+    .card { background:#151b2f; border:1px solid #2a3350; border-radius:14px; padding:20px; margin:16px 0; }
+    textarea, input { width:100%; box-sizing:border-box; background:#0f1528; color:#eef2ff; border:1px solid #394566; border-radius:8px; padding:12px; }
+    button { margin-top:10px; background:#6d5dfc; color:white; border:0; border-radius:8px; padding:10px 16px; cursor:pointer; font-weight:600; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#0f1528; padding:14px; border-radius:8px; border:1px solid #27304a; }
+    code { color:#c4b5fd; } .ok { color:#86efac; } .warn { color:#fbbf24; }
+    .pill { display:inline-block; padding:4px 9px; margin:2px; border:1px solid #3f4a68; border-radius:999px; font-size:.85rem; }
+  </style>
+</head>
+<body>
+  <h1>RAGOps Evaluation Dashboard</h1>
+  <p class="muted">BM25 + SentenceTransformers + FAISS → Hybrid Fusion → CrossEncoder → Qwen → Citation & Grounding Checks → SQLite Traces</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Architecture</h2>
+      <p>Local-first RAG system with real lexical/dense retrieval, reranking, local generation, abstention-aware evaluation, and query tracing.</p>
+      <span class="pill">BM25</span><span class="pill">FAISS</span><span class="pill">SentenceTransformers</span><span class="pill">CrossEncoder</span><span class="pill">Qwen</span><span class="pill">FastAPI</span>
+    </div>
+    <div class="card">
+      <h2>Runtime mode</h2>
+      <p id="modeText" class="muted"></p>
+      <p>API docs: <code>/docs</code> when running locally through FastAPI.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Live local query</h2>
+    <p class="muted">This form is enabled when the page is served by the local FastAPI backend. The public GitHub Pages version remains a static portfolio view.</p>
+    <textarea id="question" rows="3">What is retrieval augmented generation?</textarea>
+    <label for="topK">Top K</label>
+    <input id="topK" type="number" min="1" max="8" value="3" />
+    <button id="askBtn">Ask local RAG</button>
+    <p id="status" class="muted"></p>
+    <pre id="answer">No query run yet.</pre>
+  </div>
+
+  <div class="card">
+    <h2>Recent local traces</h2>
+    <button id="tracesBtn">Load traces</button>
+    <pre id="traces">No traces loaded.</pre>
+  </div>
+
+<script>
+  const local = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+  const modeText = document.getElementById("modeText");
+  const askBtn = document.getElementById("askBtn");
+  const tracesBtn = document.getElementById("tracesBtn");
+  modeText.innerHTML = local
+    ? '<span class="ok">Local API mode:</span> interactive queries are enabled.'
+    : '<span class="warn">GitHub Pages mode:</span> static portfolio only. Run FastAPI locally for live queries.';
+  askBtn.disabled = !local;
+  tracesBtn.disabled = !local;
+
+  askBtn.addEventListener("click", async () => {
+    const query = document.getElementById("question").value.trim();
+    const top_k = Number(document.getElementById("topK").value || 3);
+    const status = document.getElementById("status");
+    const answer = document.getElementById("answer");
+    if (!query) return;
+    status.textContent = "Running retrieval + generation...";
+    askBtn.disabled = true;
+    try {
+      const response = await fetch("/query", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query, top_k})
+      });
+      const data = await response.json();
+      answer.textContent = JSON.stringify(data, null, 2);
+      status.textContent = response.ok ? `Done in ${data?.latency_ms?.total ?? "?"} ms` : `Request failed (${response.status})`;
+    } catch (err) {
+      answer.textContent = String(err);
+      status.textContent = "Request failed.";
+    } finally {
+      askBtn.disabled = !local;
+    }
+  });
+
+  tracesBtn.addEventListener("click", async () => {
+    const out = document.getElementById("traces");
+    out.textContent = "Loading...";
+    try {
+      const response = await fetch("/traces?limit=10");
+      const data = await response.json();
+      out.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      out.textContent = String(err);
+    }
+  });
+</script>
+</body>
+</html>

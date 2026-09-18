@@ -1,0 +1,8 @@
+services:
+  ragops:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface

@@ -1,187 +1,239 @@
 # RAGOps Evaluation Dashboard
 
-A production-oriented RAG evaluation and observability project for measuring retrieval quality, answer support, failure modes, latency, and cost across multiple Retrieval-Augmented Generation pipeline variants.
+A local-first RAG evaluation and observability platform built with BM25, SentenceTransformers, FAISS, CrossEncoder reranking, a local Qwen LLM, FastAPI, citation validation, abstention-aware groundedness checks, SQLite query tracing, tests, Docker, GitHub Actions, and GitHub Pages.
 
-The repository contains two execution paths:
+## Current version
 
-1. **Lightweight dashboard mode** for deterministic GitHub Pages deployment and CI.
-2. **Real retrieval mode** using BM25, SentenceTransformers, FAISS vector search, hybrid score fusion, and CrossEncoder reranking.
+`v0.3.0`
 
-## Live application
+This version fixes three important evaluation issues:
 
-```text
-https://hamzakaddour.github.io/ragops-evaluation-dashboard/
-```
+1. zero citations no longer receive a perfect citation-validity score;
+2. citation validity and citation coverage are separate metrics;
+3. correct "insufficient evidence" responses are classified as abstentions instead of hallucinations.
 
-## Why this project exists
-
-A useful RAG system needs more than a chat interface. Before deployment, the engineering team should be able to answer:
-
-- Did the retriever find the correct evidence?
-- Did it rank useful evidence near the top?
-- Do dense and hybrid retrieval outperform lexical search?
-- Does reranking improve relevance enough to justify added latency?
-- Which queries fail because of missed context or weak ranking?
-- What quality/latency trade-offs appear across pipeline variants?
-
-## Implemented retrieval stack
-
-### Lexical retrieval
-- BM25 using `rank-bm25`
-
-### Dense retrieval
-- SentenceTransformer embeddings
-- default model: `sentence-transformers/all-MiniLM-L6-v2`
-- normalized embeddings
-- FAISS `IndexFlatIP` vector search
-
-### Hybrid retrieval
-- BM25 lexical scores
-- dense semantic scores
-- score normalization
-- weighted lexical + dense fusion
-
-### Reranking
-- CrossEncoder reranking
-- default model: `cross-encoder/ms-marco-MiniLM-L-6-v2`
-
-Retrieval and reranking do **not** use evaluation labels when assigning document scores.
-
-## Evaluation metrics
-
-The reusable `ragops.metrics` package implements:
-
-- Recall@K
-- Precision@K
-- Mean Reciprocal Rank (MRR)
-- nDCG@K
-
-The dashboard also shows heuristic demo indicators for groundedness, citation coverage, hallucination risk, latency, and failure tags. These are visualization-oriented heuristics, not LLM-judge scores.
+The sample corpus is also expanded so common RAG questions, including "What is retrieval-augmented generation?", are answerable from retrieved evidence.
 
 ## Architecture
 
 ```text
+Public / always online
+
+GitHub repository
+      |
+      v
+GitHub Actions
+      |
+      v
+GitHub Pages static portfolio dashboard
+
+Local / on demand
+
 corpus.json
-   |--------------------> BM25 ---------------------+
-   |                                               |
-   +--> SentenceTransformer --> FAISS ------------+--> Hybrid Fusion
-                                                   |        |
-                                                   |        v
-                                                   |   CrossEncoder
-                                                   |      Reranker
-                                                   |        |
-evaluation_queries.json ---------------------------+--------+
-                                                            |
-                                                            v
-                                                   Ranked Documents
-                                                            |
-                                                            v
-                                           Recall / Precision / MRR / nDCG
-                                                            |
-                                      +---------------------+------------------+
-                                      |                                        |
-                                      v                                        v
-                           real_evaluation_results.json              Dashboard artifacts
+   |--------------------|
+   v                    v
+ BM25           SentenceTransformers
+                         |
+                         v
+                       FAISS
+   |--------------------|
+             |
+             v
+       Hybrid retrieval
+             |
+             v
+        CrossEncoder
+             |
+             v
+        Top passages
+             |
+             v
+       Qwen local LLM
+             |
+             v
+      Answer + citations
+        /           \
+       v             v
+Citation checks   Grounding + abstention
+       \             /
+        v           v
+         SQLite traces
+              |
+              v
+           FastAPI
+              |
+              v
+     Local interactive UI
 ```
 
-## Repository structure
+## Cost
 
-```text
-ragops/
-  metrics.py                     Ranking metrics
-  retrieval.py                   BM25, dense, hybrid and reranked retrieval
+The default architecture is designed to cost $0 beyond electricity and the GitHub usage already included with your account.
 
-scripts/
-  generate_demo_artifacts.py     Lightweight deterministic Pages artifacts
-  run_real_evaluation.py         Real retrieval evaluation runner
+No paid LLM API, vector database, cloud GPU, or hosted backend is required.
 
-data/
-  corpus.json                    Source corpus
-  evaluation_queries.json        Labeled evaluation queries
-  evaluation_summary.json        Dashboard aggregate metrics
-  rag_runs.json                  Dashboard query traces
-
-tests/
-  test_metrics.py                Metric tests
-
-requirements.txt                Lightweight Pages / CI dependencies
-requirements-real.txt           SentenceTransformers + FAISS + BM25 stack
-pyproject.toml                  Installable Python package
-.github/workflows/ci.yml        Automated tests
-.github/workflows/pages.yml     Static dashboard deployment
-```
-
-## Run the dashboard locally
+## Workstation installation
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+git clone https://github.com/HamzaKaddour/ragops-evaluation-dashboard.git
+cd ragops-evaluation-dashboard
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
-python scripts/generate_demo_artifacts.py
-python -m http.server 8000
+pip install -e .
 ```
 
-Open `http://localhost:8000`.
+The first real run downloads public Hugging Face model weights. They are cached locally for later runs.
 
-## Run the real RAG retrieval evaluation
+## 1. Retrieval benchmark
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements-real.txt
-pip install -e .
 python scripts/run_real_evaluation.py
 ```
 
-The first run downloads the embedding and reranker model weights through Hugging Face. Results are written to:
+This evaluates BM25, dense FAISS retrieval, hybrid retrieval, and hybrid + CrossEncoder reranking. Results are written to:
 
 ```text
 data/real_evaluation_results.json
 ```
 
-The real evaluator compares:
+## 2. Local LLM smoke test
 
-```text
-BM25
-Dense + FAISS
-Hybrid BM25 + Dense
-Hybrid + CrossEncoder reranker
+```bash
+python scripts/test_local_llm.py
 ```
 
-## CI strategy
+## 3. CLI
 
-GitHub Actions intentionally uses the lightweight dependency set. CI validates package installation, dashboard artifact generation, and ranking-metric tests without downloading large model weights on every Pages deployment.
+```bash
+python scripts/query_cli.py
+```
 
-## Current scope and limitations
+Type `exit` to quit.
 
-Implemented:
+## 4. FastAPI + local web app
 
-- real BM25 retrieval
-- real SentenceTransformer embeddings
-- real FAISS vector search
-- hybrid lexical/semantic score fusion
-- real CrossEncoder reranking
-- reusable ranking metrics
-- automated tests and CI
-- static evaluation dashboard
+```bash
+uvicorn api.app:app --host 0.0.0.0 --port 8000
+```
 
-Not yet implemented:
-
-- live LLM answer generation
-- LLM-as-judge groundedness/faithfulness scoring
-- prompt/version registry
-- persistent vector database service such as Qdrant or OpenSearch
-- OpenTelemetry tracing
-- production authentication
-- online feedback loops
-
-## Technology stack
-
-`Python` · `SentenceTransformers` · `Hugging Face` · `FAISS` · `BM25` · `CrossEncoder` · `NumPy` · `GitHub Actions` · `GitHub Pages`
-
-## Repository topics
+Open:
 
 ```text
-rag, llm, llmops, retrieval-augmented-generation, sentence-transformers,
-faiss, semantic-search, reranking, ai-evaluation, mlops, observability, python
+http://127.0.0.1:8000/
 ```
+
+The root now redirects to the interactive local UI:
+
+```text
+http://127.0.0.1:8000/app/
+```
+
+Swagger API documentation remains available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## API endpoints
+
+- `GET /health`
+- `POST /query`
+- `GET /traces?limit=20`
+- `GET /` → redirects to `/app/`
+
+Example request:
+
+```json
+{
+  "query": "What is retrieval augmented generation?",
+  "top_k": 3
+}
+```
+
+A normal supported answer should contain citations such as `[doc_01]`. If the corpus does not contain sufficient evidence, the response should return:
+
+```json
+{
+  "answer_status": "insufficient_evidence"
+}
+```
+
+rather than inventing an answer.
+
+## Evaluation semantics
+
+### Citation validity
+
+Measures whether citations that are present point to retrieved source IDs.
+
+If an answer has no citations, validity is `null`, not `1.0`.
+
+### Citation coverage
+
+Estimates whether factual answer sentences are accompanied by citations.
+
+### Abstention
+
+A correct refusal such as "the available evidence is insufficient" is classified as an abstention. Abstention language is not counted as an unsupported factual claim.
+
+### Groundedness
+
+The current groundedness score is an embedding-similarity heuristic using SentenceTransformers. It is useful for portfolio observability but is not presented as human verification or an LLM-judge ground truth.
+
+## Tests
+
+Run:
+
+```bash
+pytest -q
+```
+
+The GitHub CI workflow intentionally runs only lightweight tests and does not download the Qwen, embedding, or reranker model weights.
+
+## GitHub deployment
+
+The repository has two deployment modes:
+
+### GitHub Pages — public static site
+
+`.github/workflows/pages.yml` publishes only `static/`.
+
+The Pages site is always online and free within your GitHub plan. It intentionally does not run Qwen or FastAPI because GitHub Pages is static hosting.
+
+### Workstation — full RAG backend
+
+The complete FastAPI + Qwen + FAISS service is started on demand with:
+
+```bash
+uvicorn api.app:app --host 0.0.0.0 --port 8000
+```
+
+Your workstation does not need to remain on after you finish testing or demonstrating the backend.
+
+## Updating the existing GitHub repository
+
+After replacing the changed files and testing locally:
+
+```bash
+git status
+git add .
+git commit -m "feat: complete grounded RAG evaluation workflow"
+git push origin main
+```
+
+Then verify:
+
+1. GitHub → **Actions** → `CI` is green.
+2. GitHub → **Actions** → `Deploy static dashboard` is green.
+3. GitHub → **Settings → Pages** shows **GitHub Actions** as the source.
+4. Open `https://hamzakaddour.github.io/ragops-evaluation-dashboard/`.
+
+The public Pages site will be static. The local interactive API remains available only when FastAPI is running on the workstation.
+
+## Requirements
+
+All runtime dependencies are listed in `requirements.txt`. No paid API credentials are required.

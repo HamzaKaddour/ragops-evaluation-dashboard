@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: ragops-evaluation-dashboard
+Version: 0.3.0
+Summary: Local-first RAG evaluation and observability platform
+Requires-Python: >=3.10

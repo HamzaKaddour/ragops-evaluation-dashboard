@@ -1,44 +1,12 @@
 [
-  {
-    "id": "q001",
-    "query": "How should a production RAG system detect unsupported claims?",
-    "expected_answer_topics": ["claim verification", "retrieved evidence", "groundedness", "citation coverage", "hallucination risk"],
-    "relevant_doc_ids": ["doc_rag_eval_001", "doc_rag_eval_003"],
-    "preferred_pipeline": "Hybrid + reranker"
-  },
-  {
-    "id": "q002",
-    "query": "Why can keyword-only retrieval fail in technical support assistants?",
-    "expected_answer_topics": ["lexical mismatch", "different vocabulary", "abbreviations", "semantic retrieval", "recall"],
-    "relevant_doc_ids": ["doc_support_001", "doc_rag_eval_002"],
-    "preferred_pipeline": "Dense embeddings"
-  },
-  {
-    "id": "q003",
-    "query": "What does reranking add after hybrid retrieval?",
-    "expected_answer_topics": ["candidate passages", "ranking quality", "answer relevance", "context window"],
-    "relevant_doc_ids": ["doc_rag_eval_002"],
-    "preferred_pipeline": "Hybrid + reranker"
-  },
-  {
-    "id": "q004",
-    "query": "How can RAG dashboards expose cost and latency trade-offs?",
-    "expected_answer_topics": ["latency", "token cost", "cost per query", "cost per thousand queries", "pipeline comparison"],
-    "relevant_doc_ids": ["doc_rag_eval_004", "doc_ops_001"],
-    "preferred_pipeline": "Hybrid retrieval"
-  },
-  {
-    "id": "q005",
-    "query": "What is the main benefit of evaluating RAG before deployment?",
-    "expected_answer_topics": ["regression testing", "retrieval quality", "answer quality", "latency", "cost", "failure categories"],
-    "relevant_doc_ids": ["doc_rag_eval_006", "doc_rag_eval_001", "doc_rag_eval_005"],
-    "preferred_pipeline": "Hybrid + reranker"
-  },
-  {
-    "id": "q006",
-    "query": "Why is trace-level inspection useful for debugging RAG failures?",
-    "expected_answer_topics": ["query", "retrieved chunks", "ranking scores", "answer", "failure tags"],
-    "relevant_doc_ids": ["doc_rag_eval_005"],
-    "preferred_pipeline": "Hybrid + reranker"
-  }
+  {"id":"q1","query":"What is retrieval augmented generation?","relevant_doc_ids":["doc_01","doc_02"],"expected_answer_topics":["retrieval","external knowledge","LLM","grounding"]},
+  {"id":"q2","query":"Which metrics should I use to evaluate RAG retrieval quality?","relevant_doc_ids":["doc_03"],"expected_answer_topics":["Recall@K","Precision@K","MRR","nDCG"]},
+  {"id":"q3","query":"Why combine BM25 and dense retrieval?","relevant_doc_ids":["doc_04","doc_05","doc_06"],"expected_answer_topics":["lexical retrieval","dense retrieval","hybrid fusion"]},
+  {"id":"q4","query":"What is the role of a CrossEncoder in a RAG pipeline?","relevant_doc_ids":["doc_09"],"expected_answer_topics":["reranking","query-document scoring","candidate list"]},
+  {"id":"q5","query":"How does FAISS fit into a RAG system?","relevant_doc_ids":["doc_05","doc_07","doc_08"],"expected_answer_topics":["embeddings","vector search","similarity"]},
+  {"id":"q6","query":"How can a RAG system reduce unsupported answers?","relevant_doc_ids":["doc_11","doc_13","doc_14","doc_15"],"expected_answer_topics":["grounding","citations","abstention"]},
+  {"id":"q7","query":"What should be logged for RAG observability?","relevant_doc_ids":["doc_16","doc_17","doc_18"],"expected_answer_topics":["query traces","scores","latency","metrics"]},
+  {"id":"q8","query":"Why should an evaluation set include unanswerable questions?","relevant_doc_ids":["doc_15","doc_20"],"expected_answer_topics":["abstention","hallucination","missing evidence"]},
+  {"id":"q9","query":"What factors matter when chunking documents for RAG?","relevant_doc_ids":["doc_10"],"expected_answer_topics":["chunk size","overlap","context","metadata"]},
+  {"id":"q10","query":"What are common RAG failure modes?","relevant_doc_ids":["doc_19"],"expected_answer_topics":["retrieval misses","ranking","citations","unsupported claims"]}
 ]

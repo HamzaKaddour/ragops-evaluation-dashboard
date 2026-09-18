@@ -1,0 +1,17 @@
+Replace these files in the existing repository:
+
+api/app.py
+ragops/citations.py
+ragops/grounding.py
+ragops/generation.py
+ragops/pipeline.py
+data/corpus.json
+data/evaluation_queries.json
+static/index.html
+tests/test_api.py
+tests/test_citations.py
+tests/test_grounding.py
+.github/workflows/ci.yml
+README.md
+requirements.txt
+pyproject.toml
