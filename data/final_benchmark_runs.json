@@ -5,7 +5,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "Retrieval-Augmented Generation (RAG) integrates external knowledge sources to enhance language models' ability to generate accurate answers. It leverages both lexical and dense retrieval techniques to retrieve relevant information, improving factual grounding and accessibility of private or dynamic data.",
+    "answer": "Retrieval-Augmented Generation (RAG) is an architecture that integrates external knowledge sources to enhance the accuracy of generated answers by providing relevant contextual evidence through retrieval processes [doc_01].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -31,31 +31,28 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_01"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
-      "groundedness_score": 0.75,
+      "groundedness_score": 1.0,
       "supported_sentences": 1,
-      "weak_sentences": 1,
+      "weak_sentences": 0,
       "unsupported_sentences": 0,
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "Retrieval-Augmented Generation (RAG) integrates external knowledge sources to enhance language models' ability to generate accurate answers.",
-          "max_similarity": 0.822,
+          "sentence": "Retrieval-Augmented Generation (RAG) is an architecture that integrates external knowledge sources to enhance the accuracy of generated answers by providing relevant contextual evidence through retrieval processes [doc_01].",
+          "max_similarity": 0.898,
           "support": "supported"
-        },
-        {
-          "sentence": "It leverages both lexical and dense retrieval techniques to retrieve relevant information, improving factual grounding and accessibility of private or dynamic data.",
-          "max_similarity": 0.498,
-          "support": "weak"
         }
       ],
       "retrieval_confidence": {
@@ -66,9 +63,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 61.2,
-      "generation": 6679.5,
-      "total": 6772.8
+      "retrieval": 67.8,
+      "generation": 4999.9,
+      "total": 5126.2
     }
   },
   {
@@ -77,7 +74,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "To evaluate RAG retrieval quality, consider using metrics like Recall at K, Precision at K, Mean Reciprocal Rank (MRR), and nDCG. These methods assess different aspects of relevance and performance within the system.",
+    "answer": "To evaluate RAG retrieval quality, consider using metrics like Recall at K, Precision at K, Mean Reciprocal Rank (MRR), and nDCG [doc_03]. These metrics assess different aspects of relevance and performance in retrieving evidence from the document corpus [doc_03].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -103,13 +100,15 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_03"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
@@ -120,13 +119,13 @@
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "To evaluate RAG retrieval quality, consider using metrics like Recall at K, Precision at K, Mean Reciprocal Rank (MRR), and nDCG.",
+          "sentence": "To evaluate RAG retrieval quality, consider using metrics like Recall at K, Precision at K, Mean Reciprocal Rank (MRR), and nDCG [doc_03].",
           "max_similarity": 0.859,
           "support": "supported"
         },
         {
-          "sentence": "These methods assess different aspects of relevance and performance within the system.",
-          "max_similarity": 0.484,
+          "sentence": "These metrics assess different aspects of relevance and performance in retrieving evidence from the document corpus [doc_03].",
+          "max_similarity": 0.488,
           "support": "weak"
         }
       ],
@@ -138,9 +137,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 52.2,
-      "generation": 6205.2,
-      "total": 6284.6
+      "retrieval": 42.5,
+      "generation": 6609.1,
+      "total": 6710.7
     }
   },
   {
@@ -149,7 +148,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "Combining BM25 (a lexical retrieval method) with dense retrieval enhances retrieval effectiveness by leveraging both lexical strength for exact terms and identifiers and semantic similarity captured through dense vectors.",
+    "answer": "Combining BM25 (a lexical retrieval method) with dense retrieval enhances the effectiveness of search results by leveraging both exact term matching and semantic similarity, making it suitable for various applications where precision and recall need to be balanced [doc_04].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -175,13 +174,15 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_04"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
@@ -192,8 +193,8 @@
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "Combining BM25 (a lexical retrieval method) with dense retrieval enhances retrieval effectiveness by leveraging both lexical strength for exact terms and identifiers and semantic similarity captured through dense vectors.",
-          "max_similarity": 0.841,
+          "sentence": "Combining BM25 (a lexical retrieval method) with dense retrieval enhances the effectiveness of search results by leveraging both exact term matching and semantic similarity, making it suitable for various applications where precision and recall need to be balanced [doc_04].",
+          "max_similarity": 0.817,
           "support": "supported"
         }
       ],
@@ -205,9 +206,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 34.3,
-      "generation": 4867.5,
-      "total": 4932.8
+      "retrieval": 53.1,
+      "generation": 6551.6,
+      "total": 6664.4
     }
   },
   {
@@ -216,7 +217,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "In a RAG pipeline, a CrossEncoder plays a crucial role by jointly scoring a query and candidate document pair, which helps improve accuracy over traditional methods like BM25. However, its computational cost makes it typically applied only to a short candidate list generated through other efficient retrieval techniques such as BM25 or dense search.",
+    "answer": "In a RAG (Relevance-Aware Generation) pipeline, a CrossEncoder plays a crucial role by jointly scoring a query and candidate document pairs, which helps improve accuracy over simpler methods like bi-encoder similarity [doc_09]. However, its computational cost makes it typically applied only to a short list of candidates generated by other retrieval techniques such as BM25, dense search, or hybrid retrieval [doc_09].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -242,13 +243,15 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_09"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
@@ -259,13 +262,13 @@
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "In a RAG pipeline, a CrossEncoder plays a crucial role by jointly scoring a query and candidate document pair, which helps improve accuracy over traditional methods like BM25.",
-          "max_similarity": 0.796,
+          "sentence": "In a RAG (Relevance-Aware Generation) pipeline, a CrossEncoder plays a crucial role by jointly scoring a query and candidate document pairs, which helps improve accuracy over simpler methods like bi-encoder similarity [doc_09].",
+          "max_similarity": 0.798,
           "support": "supported"
         },
         {
-          "sentence": "However, its computational cost makes it typically applied only to a short candidate list generated through other efficient retrieval techniques such as BM25 or dense search.",
-          "max_similarity": 0.47,
+          "sentence": "However, its computational cost makes it typically applied only to a short list of candidates generated by other retrieval techniques such as BM25, dense search, or hybrid retrieval [doc_09].",
+          "max_similarity": 0.527,
           "support": "weak"
         }
       ],
@@ -277,9 +280,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 51.6,
-      "generation": 8141.8,
-      "total": 8218.5
+      "retrieval": 51.4,
+      "generation": 13721.2,
+      "total": 13872.9
     }
   },
   {
@@ -288,7 +291,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "In a RAG system, FAISS fits as an efficient library for building indexes over dense vectors, particularly suitable for normalized embeddings like those produced by Sentence Transformers. This allows for fast and accurate comparison between corpus passages and incoming queries within the same vector space.",
+    "answer": "FAISS fits into a RAG system as an efficient library for building indexes over dense vectors, which helps in performing similarity searches similar to cosine similarity [doc_07].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -314,31 +317,28 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_07"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
-      "groundedness_score": 0.75,
+      "groundedness_score": 1.0,
       "supported_sentences": 1,
-      "weak_sentences": 1,
+      "weak_sentences": 0,
       "unsupported_sentences": 0,
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "In a RAG system, FAISS fits as an efficient library for building indexes over dense vectors, particularly suitable for normalized embeddings like those produced by Sentence Transformers.",
-          "max_similarity": 0.711,
+          "sentence": "FAISS fits into a RAG system as an efficient library for building indexes over dense vectors, which helps in performing similarity searches similar to cosine similarity [doc_07].",
+          "max_similarity": 0.82,
           "support": "supported"
-        },
-        {
-          "sentence": "This allows for fast and accurate comparison between corpus passages and incoming queries within the same vector space.",
-          "max_similarity": 0.543,
-          "support": "weak"
         }
       ],
       "retrieval_confidence": {
@@ -349,18 +349,18 @@
       }
     },
     "latency_ms": {
-      "retrieval": 35.7,
-      "generation": 6562.2,
-      "total": 6627.1
+      "retrieval": 77.2,
+      "generation": 8684.2,
+      "total": 8864.0
     }
   },
   {
     "query_id": "q6",
     "query": "How can a RAG system reduce unsupported answers?",
     "expected_answer_status": "answered",
-    "answer_status": "insufficient_evidence",
-    "behavior_correct": false,
-    "answer": "To reduce unsupported answers in a RAG system, the system should abstain when retrieved evidence is insufficient. This differs from a hallucination where the system incorrectly generates information based on lack of evidence. Evaluating the cause of failures helps distinguish between retrieval misses, poor ranking, and other issues like contradictory sources or insufficient evidence.",
+    "answer_status": "answered",
+    "behavior_correct": true,
+    "answer": "A RAG system reduces unsupported answers by recognizing when it does not have sufficient evidence and abstaining from providing a response in such cases [doc_15].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -386,36 +386,28 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_15"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": null,
-      "citation_status": "not_applicable",
-      "answer_status": "insufficient_evidence",
-      "abstained": true,
-      "groundedness_score": 0.667,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
+      "citation_status": "evaluated",
+      "answer_status": "answered",
+      "abstained": false,
+      "groundedness_score": 1.0,
       "supported_sentences": 1,
       "weak_sentences": 0,
-      "unsupported_sentences": 1,
-      "abstention_sentences": 1,
+      "unsupported_sentences": 0,
+      "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "To reduce unsupported answers in a RAG system, the system should abstain when retrieved evidence is insufficient.",
-          "max_similarity": 0.777,
+          "sentence": "A RAG system reduces unsupported answers by recognizing when it does not have sufficient evidence and abstaining from providing a response in such cases [doc_15].",
+          "max_similarity": 0.73,
           "support": "supported"
-        },
-        {
-          "sentence": "This differs from a hallucination where the system incorrectly generates information based on lack of evidence.",
-          "max_similarity": 0.432,
-          "support": "unsupported"
-        },
-        {
-          "sentence": "Evaluating the cause of failures helps distinguish between retrieval misses, poor ranking, and other issues like contradictory sources or insufficient evidence.",
-          "max_similarity": null,
-          "support": "abstention"
         }
       ],
       "retrieval_confidence": {
@@ -426,9 +418,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 41.8,
-      "generation": 7939.1,
-      "total": 8007.1
+      "retrieval": 80.5,
+      "generation": 4562.9,
+      "total": 4686.1
     }
   },
   {
@@ -437,7 +429,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "For RAG observability, logging should capture queries, retrieved documents, retrieval and reranker scores, generated answers, citations, latency, model versions, and evaluation signals per request. Additionally, document chunking parameters such as chunk sizes, overlaps, headings, and metadata should be recorded to assess their impact on retrieval quality.",
+    "answer": "For RAG observability, logging of queries, retrieved documents, retrieval and reranker scores, generated answers, citations, latency, model version, and evaluation signals is recommended [doc_16].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -463,30 +455,27 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_16"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
       "groundedness_score": 1.0,
-      "supported_sentences": 2,
+      "supported_sentences": 1,
       "weak_sentences": 0,
       "unsupported_sentences": 0,
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "For RAG observability, logging should capture queries, retrieved documents, retrieval and reranker scores, generated answers, citations, latency, model versions, and evaluation signals per request.",
-          "max_similarity": 0.849,
-          "support": "supported"
-        },
-        {
-          "sentence": "Additionally, document chunking parameters such as chunk sizes, overlaps, headings, and metadata should be recorded to assess their impact on retrieval quality.",
-          "max_similarity": 0.738,
+          "sentence": "For RAG observability, logging of queries, retrieved documents, retrieval and reranker scores, generated answers, citations, latency, model version, and evaluation signals is recommended [doc_16].",
+          "max_similarity": 0.866,
           "support": "supported"
         }
       ],
@@ -498,9 +487,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 46.0,
-      "generation": 8042.7,
-      "total": 8111.4
+      "retrieval": 45.8,
+      "generation": 4874.6,
+      "total": 4966.8
     }
   },
   {
@@ -509,7 +498,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "An evaluation set should include both answerable and intentionally unanswerable questions to assess whether retrieval and generation can effectively utilize available evidence versus recognizing and avoiding missing information.",
+    "answer": "An evaluation set should include both answerable and intentionally unanswerable questions to assess whether retrieval and generation can effectively utilize available evidence versus recognizing missing information and avoiding incorrect responses [doc_20].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -535,13 +524,15 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_20"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
@@ -552,8 +543,8 @@
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "An evaluation set should include both answerable and intentionally unanswerable questions to assess whether retrieval and generation can effectively utilize available evidence versus recognizing and avoiding missing information.",
-          "max_similarity": 0.814,
+          "sentence": "An evaluation set should include both answerable and intentionally unanswerable questions to assess whether retrieval and generation can effectively utilize available evidence versus recognizing missing information and avoiding incorrect responses [doc_20].",
+          "max_similarity": 0.807,
           "support": "supported"
         }
       ],
@@ -565,9 +556,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 35.1,
-      "generation": 4626.1,
-      "total": 4682.3
+      "retrieval": 37.2,
+      "generation": 4741.3,
+      "total": 4823.3
     }
   },
   {
@@ -576,7 +567,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "When chunking documents for RAG, factors like chunk size, overlap, headings, and metadata significantly impact retrieval quality. The optimal configuration should be determined through evaluation.",
+    "answer": "When chunking documents for RAG, factors such as chunk size, overlap, headings, and metadata significantly impact retrieval quality [doc_10]. The optimal configuration should be evaluated rather than assumed.",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -602,13 +593,15 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_10"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 0.5,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
@@ -619,13 +612,13 @@
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "When chunking documents for RAG, factors like chunk size, overlap, headings, and metadata significantly impact retrieval quality.",
-          "max_similarity": 0.831,
+          "sentence": "When chunking documents for RAG, factors such as chunk size, overlap, headings, and metadata significantly impact retrieval quality [doc_10].",
+          "max_similarity": 0.84,
           "support": "supported"
         },
         {
-          "sentence": "The optimal configuration should be determined through evaluation.",
-          "max_similarity": 0.229,
+          "sentence": "The optimal configuration should be evaluated rather than assumed.",
+          "max_similarity": 0.14,
           "support": "unsupported"
         }
       ],
@@ -637,9 +630,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 46.3,
-      "generation": 4913.5,
-      "total": 4985.8
+      "retrieval": 51.1,
+      "generation": 5106.7,
+      "total": 5220.4
     }
   },
   {
@@ -648,7 +641,7 @@
     "expected_answer_status": "answered",
     "answer_status": "answered",
     "behavior_correct": true,
-    "answer": "Common RAG failure modes include retrieval misses, poor ranking, incomplete context, contradictory sources, fabricated citations, unsupported answer claims, excessive latency, and answering when the evidence is insufficient. Evaluation should identify which stage caused a failure rather than treating all bad answers as generation errors.",
+    "answer": "Common RAG failure modes include retrieval misses, poor ranking, incomplete context, contradictory sources, fabricated citations, unsupported answer claims, excessive latency, and answering when the evidence is insufficient [doc_19].",
     "model": "Qwen/Qwen2.5-1.5B-Instruct",
     "sources": [
       {
@@ -674,30 +667,27 @@
       }
     ],
     "metrics": {
-      "citations": [],
-      "citation_count": 0,
-      "valid_citation_count": 0,
+      "citations": [
+        "doc_19"
+      ],
+      "citation_count": 1,
+      "valid_citation_count": 1,
       "invalid_citation_count": 0,
       "invalid_citations": [],
-      "citation_validity": null,
-      "citation_coverage": 0.0,
+      "citation_validity": 1.0,
+      "citation_coverage": 1.0,
       "citation_status": "evaluated",
       "answer_status": "answered",
       "abstained": false,
       "groundedness_score": 1.0,
-      "supported_sentences": 2,
+      "supported_sentences": 1,
       "weak_sentences": 0,
       "unsupported_sentences": 0,
       "abstention_sentences": 0,
       "sentences": [
         {
-          "sentence": "Common RAG failure modes include retrieval misses, poor ranking, incomplete context, contradictory sources, fabricated citations, unsupported answer claims, excessive latency, and answering when the evidence is insufficient.",
+          "sentence": "Common RAG failure modes include retrieval misses, poor ranking, incomplete context, contradictory sources, fabricated citations, unsupported answer claims, excessive latency, and answering when the evidence is insufficient [doc_19].",
           "max_similarity": 0.934,
-          "support": "supported"
-        },
-        {
-          "sentence": "Evaluation should identify which stage caused a failure rather than treating all bad answers as generation errors.",
-          "max_similarity": 0.701,
           "support": "supported"
         }
       ],
@@ -709,9 +699,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 42.6,
-      "generation": 6995.9,
-      "total": 7073.1
+      "retrieval": 44.5,
+      "generation": 4980.0,
+      "total": 5067.0
     }
   },
   {
@@ -776,9 +766,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 51.2,
+      "retrieval": 45.3,
       "generation": 0.0,
-      "total": 85.9
+      "total": 73.8
     }
   },
   {
@@ -843,9 +833,9 @@
       }
     },
     "latency_ms": {
-      "retrieval": 48.1,
+      "retrieval": 52.2,
       "generation": 0.0,
-      "total": 73.3
+      "total": 72.9
     }
   }
 ]
