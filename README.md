@@ -4,13 +4,15 @@ A local-first RAG evaluation and observability platform built with BM25, Sentenc
 
 ## Current version
 
-`v0.4.0`
+`v0.5.0`
 
-This version fixes three important evaluation issues:
+This version adds a measured reliability iteration on top of the v1 benchmark:
 
-1. zero citations no longer receive a perfect citation-validity score;
-2. citation validity and citation coverage are separate metrics;
-3. correct "insufficient evidence" responses are classified as abstentions instead of hallucinations.
+1. a retrieval-confidence gate blocks generation when CrossEncoder evidence is too weak;
+2. the default gate threshold is `-3.0`, calibrated against the repository's v1 benchmark and configurable with `RAGOPS_RERANK_THRESHOLD`;
+3. Qwen is prompted to attach citations to every factual sentence;
+4. groundedness ignores standalone citation fragments and removes citation tokens before semantic comparison;
+5. the final benchmark is now versioned as `final-v2`.
 
 The sample corpus is also expanded so common RAG questions, including "What is retrieval-augmented generation?", are answerable from retrieved evidence.
 
@@ -90,7 +92,7 @@ The first real run downloads public Hugging Face model weights. They are cached 
 
 ## 1. Final end-to-end benchmark
 
-Run the authoritative workstation benchmark:
+Run the authoritative workstation benchmark after pulling the latest v2 code:
 
 ```bash
 python scripts/run_final_benchmark.py
@@ -278,3 +280,52 @@ git push origin main
 ```
 
 GitHub Pages will automatically redeploy. The dashboard prefers the final benchmark artifacts when they exist and falls back to the legacy demo summary only when they are absent.
+
+
+## Reliability v2
+
+The v1 benchmark exposed three generation-side weaknesses despite strong retrieval:
+- average groundedness: 58%
+- average citation coverage: 18.9%
+- abstention accuracy: 50%
+
+The v2 pipeline addresses these directly.
+
+### Retrieval-confidence gate
+
+Before Qwen runs, the strongest CrossEncoder score is checked. The default threshold is:
+
+```text
+-3.0
+```
+
+If the best reranked passage is below that value, the system returns a deterministic insufficient-evidence response and skips generation. The threshold was calibrated from this repository's small v1 benchmark and is intentionally configurable:
+
+```bash
+export RAGOPS_RERANK_THRESHOLD=-3.0
+```
+
+It is not presented as a universal CrossEncoder threshold.
+
+### Citation contract
+
+Normal generated answers are constrained to one to three concise factual sentences. Every sentence must end with one or more retrieved source IDs, for example:
+
+```text
+BM25 is a lexical retrieval method [doc_04].
+```
+
+### Re-running v2
+
+After pulling the v2 code:
+
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+
+pytest -q
+python scripts/run_final_benchmark.py
+```
+
+The generated benchmark JSON files overwrite the previous final artifacts. Inspect them before committing.
