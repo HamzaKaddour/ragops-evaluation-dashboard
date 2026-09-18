@@ -117,7 +117,7 @@ function renderQuery(data,demo=false){
 
 async function loadBenchmark(){
   try{
-    const r=await fetch("./data/final_benchmark_summary.json");
+    const r=await fetch("./data/final_benchmark_summary.json?v="+Date.now(), {cache:"no-store"});
     if(!r.ok) throw new Error();
     const d=await r.json(),e=d.end_to_end||{};
     document.getElementById("benchmarkNote").innerHTML='<span class="ok">Final workstation benchmark loaded.</span> Generated '+new Date(d.generated_at).toLocaleString()+'.';
@@ -134,7 +134,7 @@ async function loadBenchmark(){
     ).join("");
   }catch(e){
     document.getElementById("benchmarkNote").innerHTML='<span class="warn">Final workstation benchmark not committed yet.</span> Run <code>python scripts/run_final_benchmark.py</code> on the workstation, then commit the generated JSON files.';
-    const r=await fetch("./data/evaluation_summary.json");
+    const r=await fetch("./data/evaluation_summary.json?v="+Date.now(), {cache:"no-store"});
     if(r.ok){
       const d=await r.json(),m=d.summary_metrics||{};
       document.getElementById("summaryMetrics").innerHTML=`
@@ -147,7 +147,7 @@ async function loadBenchmark(){
 async function loadFinalRuns(){
   if(local) return;
   try{
-    const r=await fetch("./data/final_benchmark_runs.json");
+    const r=await fetch("./data/final_benchmark_runs.json?v="+Date.now(), {cache:"no-store"});
     if(!r.ok) throw new Error();
     finalRuns=await r.json();
     const select=document.getElementById("recordedQuery");
@@ -181,7 +181,7 @@ askBtn.addEventListener("click",async()=>{
 tracesBtn.addEventListener("click",async()=>{
   tracesBtn.disabled=true; traces.innerHTML='<span class="muted">Loading...</span>';
   try{
-    const endpoint=local?"/traces?limit=20":"./data/final_benchmark_runs.json";
+    const endpoint=local?"/traces?limit=20":"./data/final_benchmark_runs.json?v="+Date.now();
     const r=await fetch(endpoint); if(!r.ok) throw new Error("trace data unavailable");
     const p=await r.json(),items=Array.isArray(p)?p:(p.traces||p.items||[]);
     traces.innerHTML=items.map((t,i)=>{
