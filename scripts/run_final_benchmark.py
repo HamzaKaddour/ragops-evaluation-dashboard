@@ -33,6 +33,7 @@ from pathlib import Path
 from statistics import mean
 
 from ragops.citations import validate_citations
+from ragops.confidence import ABSTENTION_ANSWER, assess_retrieval_confidence
 from ragops.generation import LocalGenerator
 from ragops.grounding import GroundingEvaluator, is_abstention
 from ragops.metrics import ndcg_at_k, precision_at_k, recall_at_k, reciprocal_rank
@@ -113,9 +114,17 @@ def evaluate_generation(
         sources = retriever.hybrid_rerank(query["query"], k=top_k)
         retrieval_ms = (time.perf_counter() - retrieval_started) * 1000
 
-        generation_started = time.perf_counter()
-        generated = generator.generate(query["query"], sources)
-        generation_ms = (time.perf_counter() - generation_started) * 1000
+        confidence = assess_retrieval_confidence(sources)
+        if confidence["sufficient_evidence"]:
+            generation_started = time.perf_counter()
+            generated = generator.generate(query["query"], sources)
+            generation_ms = (time.perf_counter() - generation_started) * 1000
+        else:
+            generated = {
+                "answer": ABSTENTION_ANSWER,
+                "model": "retrieval-confidence-gate",
+            }
+            generation_ms = 0.0
 
         answer = generated["answer"]
         abstained = is_abstention(answer)
@@ -155,6 +164,7 @@ def evaluate_generation(
                 "metrics": {
                     **citations,
                     **grounding_metrics,
+                    "retrieval_confidence": confidence,
                 },
                 "latency_ms": {
                     "retrieval": round(retrieval_ms, 1),
@@ -201,6 +211,9 @@ def evaluate_generation(
         "avg_retrieval_ms": round(mean(r["latency_ms"]["retrieval"] for r in runs), 1),
         "avg_generation_ms": round(mean(r["latency_ms"]["generation"] for r in runs), 1),
         "avg_total_ms": round(mean(r["latency_ms"]["total"] for r in runs), 1),
+        "confidence_gated_abstentions": sum(
+            r["metrics"]["retrieval_confidence"]["gate"] == "abstain" for r in runs
+        ),
     }
     return summary, runs
 
@@ -241,7 +254,7 @@ def main() -> None:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "benchmark_version": "final-v1",
+        "benchmark_version": "final-v2",
         "top_k_generation": args.top_k,
         "retrieval_k": 5,
         "models": {
