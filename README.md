@@ -1,5 +1,7 @@
 # RAGOps Evaluation Dashboard
 
+[**Portfolio case study → https://hamzakaddour.github.io/case-studies/ragops.html**](https://hamzakaddour.github.io/case-studies/ragops.html)
+
 A local-first RAG evaluation and observability platform built with BM25, SentenceTransformers, FAISS, CrossEncoder reranking, a local Qwen LLM, FastAPI, citation validation, abstention-aware groundedness checks, SQLite query tracing, tests, Docker, GitHub Actions, and GitHub Pages.
 
 ## Current version
