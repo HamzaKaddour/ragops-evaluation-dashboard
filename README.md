@@ -1,5 +1,10 @@
 # RAGOps Evaluation Dashboard
 
+[![CI](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/ci.yml)
+[![Pages](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/pages.yml/badge.svg)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/pages.yml)
+[![Release](https://img.shields.io/github/v/release/HamzaKaddour/ragops-evaluation-dashboard?label=release)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/releases/latest)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/HamzaKaddour/ragops-evaluation-dashboard?quickstart=1)
+
 [**Portfolio case study → https://hamzakaddour.github.io/case-studies/ragops.html**](https://hamzakaddour.github.io/case-studies/ragops.html)
 
 A local-first RAG evaluation and observability platform built with BM25, SentenceTransformers, FAISS, CrossEncoder reranking, a local Qwen LLM, FastAPI, citation validation, abstention-aware groundedness checks, SQLite query tracing, tests, Docker, GitHub Actions, and GitHub Pages.
