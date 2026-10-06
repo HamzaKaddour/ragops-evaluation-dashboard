@@ -5,6 +5,11 @@
 [![Release](https://img.shields.io/github/v/release/HamzaKaddour/ragops-evaluation-dashboard?label=release)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/releases/latest)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/HamzaKaddour/ragops-evaluation-dashboard?quickstart=1)
 
+
+### One-click development
+
+The repository includes a `.devcontainer` configuration for GitHub Codespaces. Use the **Open in GitHub Codespaces** badge above to launch a Python 3.11 environment with CPU PyTorch, project dependencies, and the package installed in editable mode. Start the API with `uvicorn api.app:app --host 0.0.0.0 --port 8000`.
+
 [**Portfolio case study → https://hamzakaddour.github.io/case-studies/ragops.html**](https://hamzakaddour.github.io/case-studies/ragops.html)
 
 A local-first RAG evaluation and observability platform built with BM25, SentenceTransformers, FAISS, CrossEncoder reranking, a local Qwen LLM, FastAPI, citation validation, abstention-aware groundedness checks, SQLite query tracing, tests, Docker, GitHub Actions, and GitHub Pages.
