@@ -1,7 +1,7 @@
 {
   "name": "RAGOps Evaluation Dashboard",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
-  "postCreateCommand": "python -m pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && pip install -e .",
+  "postCreateCommand": "python -m pip install --upgrade pip setuptools wheel && pip install torch --index-url https://download.pytorch.org/whl/cpu && pip install -r requirements.txt && pip install -e .",
   "forwardPorts": [
     8000
   ],
