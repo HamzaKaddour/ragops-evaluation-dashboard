@@ -1,0 +1,45 @@
+name: Publish repository release
+
+on:
+  push:
+    paths:
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish v0.6.0 if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: "v0.6.0"
+          TITLE: "RAGOps Evaluation Dashboard v0.6.0"
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+            exit 0
+          fi
+
+          cat > /tmp/release-notes.md <<'EOF'
+Reliability-focused RAGOps release aligned with the repository's v0.6.0 project version.
+
+Highlights:
+- hybrid BM25 + dense retrieval with FAISS
+- CrossEncoder reranking and retrieval-confidence gating
+- local Qwen generation
+- groundedness, citation validity/coverage, and abstention evaluation
+- FastAPI query/tracing endpoints
+- final-v3 benchmark artifacts
+- reproducible Codespaces environment
+EOF
+
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$TITLE" \
+            --notes-file /tmp/release-notes.md \
+            --latest
