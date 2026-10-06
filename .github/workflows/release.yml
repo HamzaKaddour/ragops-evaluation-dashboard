@@ -25,17 +25,17 @@ jobs:
           fi
 
           cat > /tmp/release-notes.md <<'EOF'
-Reliability-focused RAGOps release aligned with the repository's v0.6.0 project version.
-
-Highlights:
-- hybrid BM25 + dense retrieval with FAISS
-- CrossEncoder reranking and retrieval-confidence gating
-- local Qwen generation
-- groundedness, citation validity/coverage, and abstention evaluation
-- FastAPI query/tracing endpoints
-- final-v3 benchmark artifacts
-- reproducible Codespaces environment
-EOF
+          Reliability-focused RAGOps release aligned with the repository's v0.6.0 project version.
+          
+          Highlights:
+          - hybrid BM25 + dense retrieval with FAISS
+          - CrossEncoder reranking and retrieval-confidence gating
+          - local Qwen generation
+          - groundedness, citation validity/coverage, and abstention evaluation
+          - FastAPI query/tracing endpoints
+          - final-v3 benchmark artifacts
+          - reproducible Codespaces environment
+          EOF
 
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
