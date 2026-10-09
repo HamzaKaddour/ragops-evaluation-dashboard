@@ -1,5 +1,6 @@
 # RAGOps Evaluation Dashboard
 
+[![CodeQL](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/codeql.yml/badge.svg)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/codeql.yml)
 [![CI](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/ci.yml)
 [![Pages](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/pages.yml/badge.svg)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/actions/workflows/pages.yml)
 [![Release](https://img.shields.io/github/v/release/HamzaKaddour/ragops-evaluation-dashboard?label=release)](https://github.com/HamzaKaddour/ragops-evaluation-dashboard/releases/latest)
