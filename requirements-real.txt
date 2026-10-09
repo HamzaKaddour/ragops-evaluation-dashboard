@@ -1,4 +1,4 @@
 -r requirements.txt
 sentence-transformers>=3.0.0
-faiss-cpu>=1.8.0
+faiss-cpu>=1.15.1
 rank-bm25>=0.2.2
